@@ -7,10 +7,23 @@ export const getCurrentUser = query({
   args: {},
   handler: async (ctx) => {
     const identity = await requireAuthenticated(ctx);
-    return ctx.db
+    const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
       .unique();
+
+    if (!user) {
+      return null;
+    }
+
+    return {
+      id: String(user._id),
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      department: user.department,
+      jobTitle: user.jobTitle,
+    };
   },
 });
 

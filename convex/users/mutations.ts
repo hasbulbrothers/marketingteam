@@ -4,6 +4,23 @@ import { requireAuthenticated } from "../lib/auth";
 import { requireAdmin } from "../lib/permissions";
 import { roleValidator } from "../lib/validators";
 
+function resolveDefaultRole(email: string) {
+  const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean);
+
+  return adminEmails.includes(email) ? "admin" : "team_member";
+}
+
+function resolvePersistedRole(email: string, currentRole?: string) {
+  if (currentRole === "admin" || currentRole === "manager") {
+    return currentRole;
+  }
+
+  return resolveDefaultRole(email);
+}
+
 export const upsertUserFromClerk = mutation({
   args: {
     name: v.string(),
@@ -28,11 +45,18 @@ export const upsertUserFromClerk = mutation({
     };
 
     if (existing) {
-      await ctx.db.patch(existing._id, payload);
+      await ctx.db.patch(existing._id, {
+        ...payload,
+        role: resolvePersistedRole(payload.email, existing.role),
+      });
       return existing._id;
     }
 
-    return ctx.db.insert("users", { ...payload, role: "team_member", createdAt: Date.now() });
+    return ctx.db.insert("users", {
+      ...payload,
+      role: resolveDefaultRole(payload.email),
+      createdAt: Date.now(),
+    });
   },
 });
 

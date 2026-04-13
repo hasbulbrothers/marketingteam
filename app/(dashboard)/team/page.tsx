@@ -1,9 +1,11 @@
+import { LiveTeamPage } from "@/components/team/live-team-page";
 import { PageHeader } from "@/components/layout/page-header";
 import { WorkloadSummary } from "@/components/team/workload-summary";
 import { WorkloadTable } from "@/components/team/workload-table";
 import { buildWorkload } from "@/lib/utils/dashboard";
 
 export default function TeamPage() {
+  const hasConvex = Boolean(process.env.NEXT_PUBLIC_CONVEX_URL);
   const workload = buildWorkload([]);
   const summary = [
     { label: "Active tasks", value: String(workload.reduce((sum, item) => sum + item.tasks, 0)) },
@@ -15,14 +17,20 @@ export default function TeamPage() {
   return (
     <div className="page-frame">
       <PageHeader eyebrow="Team" title="Balance workload before tasks start slipping" description="Review who is carrying the most active work, where overdue items are stacking up, and who can take the next task." />
-      <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-[repeat(3,1fr)_240px]">
-        <FilterPill label="All roles" />
-        <FilterPill label="All platforms" />
-        <FilterPill label="All status" />
-        <FilterPill label="Workload overview" strong />
-      </div>
-      <WorkloadSummary items={summary} />
-      <WorkloadTable items={workload} />
+      {hasConvex ? (
+        <LiveTeamPage />
+      ) : (
+        <>
+          <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-[repeat(3,1fr)_240px]">
+            <FilterPill label="All roles" />
+            <FilterPill label="All platforms" />
+            <FilterPill label="All status" />
+            <FilterPill label="Workload overview" strong />
+          </div>
+          <WorkloadSummary items={summary} />
+          <WorkloadTable items={workload} />
+        </>
+      )}
     </div>
   );
 }

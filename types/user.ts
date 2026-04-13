@@ -1,3 +1,5 @@
+export type AppUserRole = "admin" | "manager" | "team_member";
+
 export type TeamRole =
   | "Content Creator"
   | "Copywriter"
@@ -12,4 +14,13 @@ export type TeamMember = {
   role: TeamRole | string;
   email?: string;
   avatarUrl?: string;
+};
+
+export type CurrentUserProfile = {
+  id: string;
+  name: string;
+  email: string;
+  role: AppUserRole;
+  department: string;
+  jobTitle: string;
 };

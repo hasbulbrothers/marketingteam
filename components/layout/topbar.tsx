@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { Bell, Plus, Search } from "lucide-react";
+import { UserRolePill } from "@/components/layout/user-role-pill";
 import { Input } from "@/components/ui/input";
 
 const hasClerk = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
-export function Topbar() {
+export function Topbar({ onCreateTask }: { onCreateTask: () => void }) {
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between gap-6 bg-background/80 px-6 py-6 backdrop-blur-md xl:px-12">
       <div className="relative w-full max-w-lg">
@@ -18,7 +19,8 @@ export function Topbar() {
         />
       </div>
       <div className="flex items-center gap-4">
-        <button className="flex items-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/95" type="button">
+        <UserRolePill />
+        <button className="flex items-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/95" type="button" onClick={onCreateTask}>
           <Plus className="h-4 w-4" />
           Create task
         </button>

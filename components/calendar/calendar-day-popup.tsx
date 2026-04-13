@@ -13,11 +13,13 @@ export function CalendarDayPopup({
   date,
   open,
   tasks,
+  onSelectTask,
   onOpenChange,
 }: {
   date: string | null;
   open: boolean;
   tasks: MarketingTask[];
+  onSelectTask: (task: MarketingTask) => void;
   onOpenChange: (open: boolean) => void;
 }) {
   return (
@@ -34,7 +36,12 @@ export function CalendarDayPopup({
         <div className="space-y-4">
           {tasks.length ? (
             tasks.map((task) => (
-              <div key={task.id} className="rounded-[28px] bg-background px-6 py-5 shadow-sm">
+              <button
+                key={task.id}
+                type="button"
+                onClick={() => onSelectTask(task)}
+                className="w-full rounded-[28px] bg-background px-6 py-5 text-left shadow-sm transition hover:bg-slate-50"
+              >
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <p className="text-sm font-semibold text-slate-800">{task.title}</p>
@@ -44,7 +51,7 @@ export function CalendarDayPopup({
                   </div>
                   <Badge variant="secondary">{task.status.replaceAll("_", " ")}</Badge>
                 </div>
-              </div>
+              </button>
             ))
           ) : (
             <div className="rounded-[28px] bg-background px-6 py-8 text-sm text-slate-500 shadow-sm">
