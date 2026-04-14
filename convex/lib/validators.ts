@@ -24,20 +24,20 @@ export const priorityValidator = v.union(
 );
 
 export const platformValidator = v.union(
-  v.literal("tiktok"),
-  v.literal("instagram"),
-  v.literal("facebook"),
-  v.literal("threads"),
-  v.literal("youtube"),
-  v.literal("email"),
-  v.literal("website"),
+  v.literal("TikTok"),
+  v.literal("Instagram"),
+  v.literal("Facebook"),
+  v.literal("Threads"),
+  v.literal("YouTube"),
+  v.literal("Email"),
+  v.literal("Website"),
 );
 
 export const contentTypeValidator = v.union(
-  v.literal("awareness"),
-  v.literal("authority"),
-  v.literal("consideration"),
-  v.literal("conversion"),
-  v.literal("campaign"),
-  v.literal("internal"),
+  v.literal("Awareness"),
+  v.literal("Authority"),
+  v.literal("Consideration"),
+  v.literal("Conversion"),
+  v.literal("Campaign"),
+  v.literal("Internal"),
 );

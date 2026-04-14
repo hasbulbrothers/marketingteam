@@ -46,6 +46,7 @@ export function filterCalendarTasks(
     : { start: startOfMonth(currentDate), end: endOfMonth(currentDate) };
 
   return tasks.filter((task) => {
+    if (!task.dueDate) return false;
     const dueDate = parseISO(task.dueDate);
     if (!isWithinInterval(dueDate, range)) return false;
     if (filters.platform !== "all" && task.platform !== filters.platform) return false;

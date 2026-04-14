@@ -4,7 +4,8 @@ export type TaskStatus =
   | "in_progress"
   | "review"
   | "scheduled"
-  | "published";
+  | "published"
+  | "archived";
 
 export type TaskPriority = "low" | "medium" | "high" | "urgent";
 export type Platform =
@@ -29,7 +30,7 @@ export type MarketingTask = {
   description: string;
   status: TaskStatus;
   priority: TaskPriority;
-  dueDate: string;
+  dueDate: string | null;
   platform: Platform;
   contentType: ContentType;
   tags: string[];

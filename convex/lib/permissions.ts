@@ -39,7 +39,7 @@ export async function requireTaskAccess(
 
   const task = await ctx.db.get(taskId as never);
 
-  if (!task || task.assigneeId !== user._id) {
+  if (!task || (task.assigneeId !== user._id && task.createdBy !== user._id)) {
     throw new Error("Task access denied.");
   }
 

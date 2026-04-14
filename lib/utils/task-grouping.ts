@@ -14,6 +14,7 @@ export function groupTasksByStatus(tasks: MarketingTask[]) {
       review: [],
       scheduled: [],
       published: [],
+      archived: [],
     } as Record<MarketingTask["status"], MarketingTask[]>,
   );
 }

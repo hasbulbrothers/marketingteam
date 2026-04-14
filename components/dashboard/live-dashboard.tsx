@@ -39,7 +39,10 @@ export function LiveDashboard() {
       ]
     : buildDashboardStats(sourceTasks);
 
-  const upcomingTasks = [...sourceTasks].sort((a, b) => a.dueDate.localeCompare(b.dueDate)).slice(0, 4);
+  const upcomingTasks = [...sourceTasks]
+    .filter((t) => t.dueDate)
+    .sort((a, b) => a.dueDate!.localeCompare(b.dueDate!))
+    .slice(0, 4);
   const reviewTasks = sourceTasks.filter((task) => task.status === "review").slice(0, 3);
   const workload = buildWorkload(sourceTasks);
   const snapshot = [

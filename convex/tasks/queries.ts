@@ -149,7 +149,7 @@ async function serializeTask(ctx: QueryCtx, task: RawTask) {
     description: task.description,
     status: task.status,
     priority: task.priority,
-    dueDate: task.dueDate ?? new Date().toISOString().slice(0, 10),
+    dueDate: task.dueDate ?? null,
     platform: task.platform,
     contentType: task.contentType,
     tags: task.tags,

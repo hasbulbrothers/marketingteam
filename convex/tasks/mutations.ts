@@ -52,7 +52,8 @@ export const updateTask = mutation({
     await ensureTaskExists(ctx, args.taskId);
     await ensureAssigneeExists(ctx, args.assigneeId);
 
-    await ctx.db.patch(args.taskId, { ...args, taskId: undefined, updatedAt: Date.now() });
+    const { taskId, ...updateFields } = args;
+    await ctx.db.patch(taskId, { ...updateFields, updatedAt: Date.now() });
   },
 });
 

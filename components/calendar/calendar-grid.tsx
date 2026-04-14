@@ -27,7 +27,7 @@ export function CalendarGrid({
       <div className="grid grid-cols-7 bg-white">
         {visibleDays.map((day) => {
           const date = format(day, "yyyy-MM-dd");
-          const dayTasks = tasks.filter((task) => isSameDay(parseISO(task.dueDate), day)).slice(0, 2);
+          const dayTasks = tasks.filter((task) => task.dueDate && isSameDay(parseISO(task.dueDate), day)).slice(0, 2);
           const isSelected = selectedDate === date;
           const inMonth = showOutsideDays ? isSameMonth(day, currentDate) : true;
 

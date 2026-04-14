@@ -4,7 +4,7 @@ import { MarketingTask } from "@/types/task";
 
 export function buildDashboardStats(tasks: MarketingTask[]): DashboardStat[] {
   const overdue = tasks.filter(
-    (task) => task.status !== "published" && isBefore(parseISO(task.dueDate), new Date()),
+    (task) => task.status !== "published" && task.dueDate && isBefore(parseISO(task.dueDate), new Date()),
   ).length;
   const dueToday = tasks.filter((task) => task.dueDate === new Date().toISOString().slice(0, 10)).length;
 
@@ -36,7 +36,7 @@ export function buildWorkload(tasks: MarketingTask[]): WorkloadItem[] {
     } else {
       current.tasks += 1;
       current.load = Math.min(current.tasks * 24, 100);
-      if (isBefore(parseISO(task.dueDate), new Date())) {
+      if (task.dueDate && isBefore(parseISO(task.dueDate), new Date())) {
         current.overdue += 1;
       }
     }
