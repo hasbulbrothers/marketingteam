@@ -28,7 +28,7 @@ export function Topbar({ onCreateTask }: { onCreateTask: () => void }) {
           <Bell className="h-5 w-5" />
         </button>
         {hasClerk ? (
-          <UserButton afterSignOutUrl="/sign-in" />
+          <UserButton />
         ) : (
           <Link href="/sign-in" className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50">
             Preview mode

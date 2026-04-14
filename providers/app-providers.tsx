@@ -17,5 +17,5 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     return content;
   }
 
-  return <ClerkProvider publishableKey={publishableKey}>{content}</ClerkProvider>;
+  return <ClerkProvider publishableKey={publishableKey} afterSignOutUrl="/sign-in">{content}</ClerkProvider>;
 }
