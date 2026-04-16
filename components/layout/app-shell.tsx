@@ -11,7 +11,29 @@ import { TeamMember } from "@/types/user";
 
 type QueryUser = TeamMember & { _id?: string };
 
+const hasConvex = Boolean(process.env.NEXT_PUBLIC_CONVEX_URL);
+
 export function AppShell({ children }: { children: React.ReactNode }) {
+  if (!hasConvex) {
+    return <PreviewAppShell>{children}</PreviewAppShell>;
+  }
+
+  return <LiveAppShell>{children}</LiveAppShell>;
+}
+
+function PreviewAppShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-background">
+      <SidebarNav />
+      <main className="min-h-screen lg:ml-72">
+        <Topbar onCreateTask={() => undefined} />
+        <div>{children}</div>
+      </main>
+    </div>
+  );
+}
+
+function LiveAppShell({ children }: { children: React.ReactNode }) {
   const { isLoaded, userId } = useAuth();
   const [isCreateOpen, setCreateOpen] = useState(false);
   const isAuthed = Boolean(isLoaded && userId);

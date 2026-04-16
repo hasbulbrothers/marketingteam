@@ -14,7 +14,21 @@ import { MarketingTask, Platform, TaskStatus } from "@/types/task";
 
 const initialMonth = new Date("2026-03-01T00:00:00");
 
-export function CalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
+export function CalendarPageClient({
+  tasks,
+  preview = false,
+}: {
+  tasks: MarketingTask[];
+  preview?: boolean;
+}) {
+  if (preview) {
+    return <CalendarPreview tasks={tasks} />;
+  }
+
+  return <LiveCalendarPageClient tasks={tasks} />;
+}
+
+function LiveCalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
   const { isLoaded, userId } = useAuth();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -71,6 +85,43 @@ export function CalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
         }}
         onOpenChange={(open) => !open && setSelectedTaskId(null)}
       />
+    </>
+  );
+}
+
+function CalendarPreview({ tasks }: { tasks: MarketingTask[] }) {
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [month, setMonth] = useState(initialMonth);
+  const [filters, setFilters] = useState<{ platform: Platform | "all"; assigneeId: string | "all"; status: TaskStatus | "all"; view: "month" | "week" }>({
+    platform: "all",
+    assigneeId: "all",
+    status: "all",
+    view: "month",
+  });
+
+  const visibleTasks = useMemo(() => filterCalendarTasks(tasks, month, filters.view, filters), [filters, month, tasks]);
+  const visibleDays = useMemo(() => buildVisibleDays(month, filters.view), [filters.view, month]);
+  const selectedTasks = useMemo(() => visibleTasks.filter((task) => task.dueDate === selectedDate), [selectedDate, visibleTasks]);
+  const assignees = useMemo(() => Array.from(new Map(tasks.map((task) => [task.assignee.id, task.assignee])).values()), [tasks]);
+
+  return (
+    <>
+      <CalendarToolbar
+        periodLabel={formatPeriodLabel(month, filters.view)}
+        filters={filters}
+        assignees={assignees.map((assignee) => ({ id: assignee.id, name: assignee.name }))}
+        onMonthChange={(direction) => setMonth((current) => changePeriod(current, direction, filters.view))}
+        onFilterChange={(key, value) => setFilters((current) => ({ ...current, [key]: value }))}
+      />
+      <CalendarGrid currentDate={month} visibleDays={visibleDays} tasks={visibleTasks} onSelectDate={setSelectedDate} selectedDate={selectedDate} showOutsideDays={filters.view === "month"} />
+      <CalendarDayPopup
+        date={selectedDate}
+        open={Boolean(selectedDate)}
+        tasks={selectedTasks}
+        onSelectTask={() => undefined}
+        onOpenChange={(open) => !open && setSelectedDate(null)}
+      />
+      <TaskDetailSheet task={null} comments={[]} onAddComment={() => undefined} onOpenChange={() => undefined} />
     </>
   );
 }

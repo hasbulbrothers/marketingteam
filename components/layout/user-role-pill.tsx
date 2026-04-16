@@ -5,7 +5,18 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { CurrentUserProfile } from "@/types/user";
 
+const hasConvex = Boolean(process.env.NEXT_PUBLIC_CONVEX_URL);
+const hasClerk = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+
 export function UserRolePill() {
+  if (!hasConvex || !hasClerk) {
+    return null;
+  }
+
+  return <LiveUserRolePill />;
+}
+
+function LiveUserRolePill() {
   const { isLoaded, userId } = useAuth();
   const isAuthed = Boolean(isLoaded && userId);
   const user = useQuery(api.users.queries.getCurrentUser, isAuthed ? {} : "skip") as CurrentUserProfile | null | undefined;
