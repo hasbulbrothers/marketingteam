@@ -1,5 +1,7 @@
+import { KpiTargetsPanel } from "@/components/kpi/kpi-targets-panel";
 import { LiveTeamPage } from "@/components/team/live-team-page";
 import { PageHeader } from "@/components/layout/page-header";
+import { TeamsManagement } from "@/components/team/teams-management";
 import { WorkloadSummary } from "@/components/team/workload-summary";
 import { WorkloadTable } from "@/components/team/workload-table";
 import { buildWorkload } from "@/lib/utils/dashboard";
@@ -17,6 +19,8 @@ export default function TeamPage() {
   return (
     <div className="page-frame">
       <PageHeader eyebrow="Team" title="Balance workload before tasks start slipping" description="Review who is carrying the most active work, where overdue items are stacking up, and who can take the next task." />
+      {hasConvex && <TeamsManagement />}
+      {hasConvex && <KpiTargetsPanel />}
       {hasConvex ? (
         <LiveTeamPage />
       ) : (

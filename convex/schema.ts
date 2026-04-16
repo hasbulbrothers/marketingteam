@@ -2,6 +2,9 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import {
   contentTypeValidator,
+  kpiMetricValidator,
+  kpiPeriodValidator,
+  kpiScopeValidator,
   platformValidator,
   priorityValidator,
   roleValidator,
@@ -17,13 +20,48 @@ export default defineSchema({
     department: v.string(),
     jobTitle: v.string(),
     avatarUrl: v.optional(v.string()),
+    teamId: v.optional(v.id("teams")),
     isActive: v.boolean(),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_clerk_id", ["clerkId"])
     .index("by_email", ["email"])
-    .index("by_role", ["role"]),
+    .index("by_role", ["role"])
+    .index("by_team", ["teamId"]),
+
+  teams: defineTable({
+    name: v.string(),
+    slug: v.string(),
+    description: v.optional(v.string()),
+    color: v.optional(v.string()),
+    leaderId: v.optional(v.id("users")),
+    isActive: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_active", ["isActive"]),
+
+  kpiTargets: defineTable({
+    scope: kpiScopeValidator,
+    teamId: v.optional(v.id("teams")),
+    userId: v.optional(v.id("users")),
+    metric: kpiMetricValidator,
+    target: v.number(),
+    period: kpiPeriodValidator,
+    startDate: v.string(),
+    endDate: v.string(),
+    platform: v.optional(platformValidator),
+    label: v.optional(v.string()),
+    isActive: v.boolean(),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_team", ["teamId"])
+    .index("by_user", ["userId"])
+    .index("by_active", ["isActive"]),
 
   tasks: defineTable({
     title: v.string(),

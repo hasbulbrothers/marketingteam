@@ -41,3 +41,21 @@ export const contentTypeValidator = v.union(
   v.literal("Campaign"),
   v.literal("Internal"),
 );
+
+export const kpiScopeValidator = v.union(
+  v.literal("team"),
+  v.literal("user"),
+);
+
+export const kpiMetricValidator = v.union(
+  v.literal("tasks_completed"),
+  v.literal("tasks_on_time"),
+  v.literal("posts_published"),
+  v.literal("average_lead_time_days"),
+);
+
+export const kpiPeriodValidator = v.union(
+  v.literal("weekly"),
+  v.literal("monthly"),
+  v.literal("quarterly"),
+);
