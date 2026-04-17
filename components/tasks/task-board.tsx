@@ -1,15 +1,12 @@
 "use client";
 
-import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { useMemo, useState } from "react";
-import { TaskColumn } from "@/components/tasks/task-column";
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
 import { TaskDetailSheet } from "@/components/tasks/task-detail-sheet";
-import { TaskFilters } from "@/components/tasks/task-filters";
+import { TaskTableNotion } from "@/components/tasks/task-table-notion";
 import { TaskToolbar } from "@/components/tasks/task-toolbar";
 import { useTaskBoard } from "@/hooks/use-task-board";
 import { useTaskFilters } from "@/hooks/use-task-filters";
-import { TASK_STATUSES } from "@/lib/constants/task-status";
 import { CampaignSummary } from "@/types/campaign";
 import { TaskComment } from "@/types/comment";
 import { MarketingTask } from "@/types/task";
@@ -22,7 +19,6 @@ type TaskBoardProps = {
   campaigns?: CampaignSummary[];
   selectedTaskId?: string | null;
   onSelectedTaskChange?: (taskId: string | null) => void;
-  onMoveTaskStatus?: (taskId: string, status: MarketingTask["status"]) => Promise<void> | void;
   onCreateTask?: (task: MarketingTask) => Promise<void> | void;
   onAddComment?: (taskId: string, message: string) => Promise<void> | void;
 };
@@ -34,7 +30,6 @@ export function TaskBoard({
   campaigns = [],
   selectedTaskId: controlledSelectedTaskId,
   onSelectedTaskChange,
-  onMoveTaskStatus,
   onCreateTask,
   onAddComment,
 }: TaskBoardProps) {
@@ -42,8 +37,8 @@ export function TaskBoard({
   const [localSelectedTaskId, setLocalSelectedTaskId] = useState<string | null>(null);
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [localCommentsByTask, setLocalCommentsByTask] = useState<Record<string, TaskComment[]>>({});
-  const { filters, setFilter, resetFilters, activeFilterCount } = useTaskFilters();
-  const { groupedTasks, summary } = useTaskBoard(tasks, filters);
+  const { filters } = useTaskFilters();
+  const { summary } = useTaskBoard(tasks, filters);
   const selectedTaskId = controlledSelectedTaskId ?? localSelectedTaskId;
   const commentsByTask = externalComments ?? localCommentsByTask;
 
@@ -62,22 +57,6 @@ export function TaskBoard({
   function openTask(taskId: string | null) {
     setLocalSelectedTaskId(taskId);
     onSelectedTaskChange?.(taskId);
-  }
-
-  async function handleDragEnd(event: DragEndEvent) {
-    const destination = event.over?.id;
-    if (!destination) return;
-    const status = destination as MarketingTask["status"];
-    const taskId = String(event.active.id);
-
-    setTasks((current) =>
-      current.map((task) =>
-        task.id === taskId && task.status !== status
-          ? { ...task, status }
-          : task,
-      ),
-    );
-    await onMoveTaskStatus?.(taskId, status);
   }
 
   async function handleCreate(task: MarketingTask) {
@@ -106,38 +85,26 @@ export function TaskBoard({
   }
 
   return (
-    <DndContext onDragEnd={handleDragEnd}>
-      <div className="space-y-5">
-        <TaskToolbar
-          summary={summary}
-          onCreate={() => setCreateOpen(true)}
-          activeFilterCount={activeFilterCount}
-        />
-        <TaskFilters filters={filters} onChange={setFilter} onReset={resetFilters} />
-        <div className="grid gap-4 xl:grid-cols-3 2xl:grid-cols-6">
-          {TASK_STATUSES.map((status) => (
-            <TaskColumn
-              key={status.value}
-              status={status}
-              tasks={groupedTasks[status.value]}
-              onSelectTask={(task) => openTask(task.id)}
-            />
-          ))}
-        </div>
-        <TaskDetailSheet
-          task={selectedTask}
-          comments={selectedTask ? commentsByTask[selectedTask.id] ?? [] : []}
-          onAddComment={handleAddComment}
-          onOpenChange={(open) => !open && openTask(null)}
-        />
-        <TaskCreateDialog
-          open={isCreateOpen}
-          onOpenChange={setCreateOpen}
-          assignees={assignees}
-          campaigns={campaigns}
-          onCreate={handleCreate}
-        />
-      </div>
-    </DndContext>
+    <div className="space-y-5">
+      <TaskToolbar
+        summary={summary}
+        onCreate={() => setCreateOpen(true)}
+        activeFilterCount={0}
+      />
+      <TaskTableNotion tasks={tasks} />
+      <TaskDetailSheet
+        task={selectedTask}
+        comments={selectedTask ? commentsByTask[selectedTask.id] ?? [] : []}
+        onAddComment={handleAddComment}
+        onOpenChange={(open) => !open && openTask(null)}
+      />
+      <TaskCreateDialog
+        open={isCreateOpen}
+        onOpenChange={setCreateOpen}
+        assignees={assignees}
+        campaigns={campaigns}
+        onCreate={handleCreate}
+      />
+    </div>
   );
 }

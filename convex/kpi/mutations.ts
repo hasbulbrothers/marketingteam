@@ -1,7 +1,7 @@
 import { mutationGeneric as mutation } from "convex/server";
 import { v } from "convex/values";
 import { requireCurrentUser } from "../lib/auth";
-import { requireManagerOrAdmin } from "../lib/permissions";
+import { requireAdmin } from "../lib/permissions";
 import {
   kpiMetricValidator,
   kpiPeriodValidator,
@@ -32,7 +32,7 @@ export const createKpiTarget = mutation({
     label: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const actor = await requireManagerOrAdmin(ctx);
+    const actor = await requireAdmin(ctx);
     validateDateRange(args.startDate, args.endDate);
 
     if (args.scope === "team" && !args.teamId) {
@@ -76,7 +76,7 @@ export const updateKpiTarget = mutation({
     isActive: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    await requireManagerOrAdmin(ctx);
+    await requireAdmin(ctx);
     const kpi = await ctx.db.get(args.kpiId);
     if (!kpi) throw new Error("KPI target not found.");
 
@@ -107,7 +107,7 @@ export const updateKpiTarget = mutation({
 export const deleteKpiTarget = mutation({
   args: { kpiId: v.id("kpiTargets") },
   handler: async (ctx, args) => {
-    await requireManagerOrAdmin(ctx);
+    await requireAdmin(ctx);
     await ctx.db.delete(args.kpiId);
   },
 });

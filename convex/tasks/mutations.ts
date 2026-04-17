@@ -3,7 +3,7 @@ import { mutationGeneric as mutation } from "convex/server";
 import { v } from "convex/values";
 import { requireCurrentUser } from "../lib/auth";
 import { isIsoDate } from "../lib/dates";
-import { requireManagerOrAdmin, requireTaskAccess } from "../lib/permissions";
+import { requireAdmin, requireTaskAccess } from "../lib/permissions";
 import {
   contentTypeValidator,
   platformValidator,
@@ -63,7 +63,7 @@ export const updateTask = mutation({
 export const deleteTask = mutation({
   args: { taskId: v.id("tasks") },
   handler: async (ctx, args) => {
-    await requireManagerOrAdmin(ctx);
+    await requireAdmin(ctx);
     await ensureTaskExists(ctx, args.taskId);
     await ctx.db.patch(args.taskId, {
       isArchived: true,
@@ -89,7 +89,7 @@ export const moveTaskStatus = mutation({
 export const assignTask = mutation({
   args: { taskId: v.id("tasks"), assigneeId: v.id("users") },
   handler: async (ctx, args) => {
-    await requireManagerOrAdmin(ctx);
+    await requireAdmin(ctx);
     await ensureTaskExists(ctx, args.taskId);
     await ensureAssigneeExists(ctx, args.assigneeId);
     await ctx.db.patch(args.taskId, { assigneeId: args.assigneeId, updatedAt: Date.now() });

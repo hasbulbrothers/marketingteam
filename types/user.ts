@@ -1,4 +1,4 @@
-export type AppUserRole = "admin" | "manager" | "team_member";
+export type AppUserRole = "admin" | "team";
 
 export type TeamRole =
   | "Content Creator"

@@ -2,8 +2,7 @@ import { v } from "convex/values";
 
 export const roleValidator = v.union(
   v.literal("admin"),
-  v.literal("manager"),
-  v.literal("team_member"),
+  v.literal("team"),
 );
 
 export const taskStatusValidator = v.union(

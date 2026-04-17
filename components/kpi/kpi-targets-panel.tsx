@@ -59,7 +59,7 @@ export function KpiTargetsPanel() {
   ) as CurrentUserProfile | null | undefined;
 
   const canManage =
-    currentUser?.role === "admin" || currentUser?.role === "manager";
+    currentUser?.role === "admin";
 
   const kpis = useQuery(
     api.kpi.queries.listKpiTargets,

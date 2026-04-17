@@ -7,16 +7,6 @@ import { requireCurrentUser } from "./auth";
 
 type ConvexCtx = GenericMutationCtx<GenericDataModel> | GenericQueryCtx<GenericDataModel>;
 
-export async function requireManagerOrAdmin(ctx: ConvexCtx) {
-  const user = await requireCurrentUser(ctx);
-
-  if (user.role !== "admin" && user.role !== "manager") {
-    throw new Error("Manager or admin access required.");
-  }
-
-  return user;
-}
-
 export async function requireAdmin(ctx: ConvexCtx) {
   const user = await requireCurrentUser(ctx);
 
@@ -33,7 +23,7 @@ export async function requireTaskAccess(
 ) {
   const user = await requireCurrentUser(ctx);
 
-  if (user.role === "admin" || user.role === "manager") {
+  if (user.role === "admin") {
     return user;
   }
 

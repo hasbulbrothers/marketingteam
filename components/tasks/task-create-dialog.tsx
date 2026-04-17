@@ -54,19 +54,20 @@ export function TaskCreateDialog({
   }
 
   function handleSave() {
+    if (!form.title.trim() || !form.description.trim()) return;
     const assignee = assignees.find((item) => item.id === form.assigneeId) ?? assignees[0];
-    if (!assignee || !form.title.trim() || !form.description.trim() || !form.dueDate) return;
+    const fallbackAssignee = assignee ?? { id: "unassigned", name: "Unassigned", role: "Team" };
     onCreate({
       id: `task-${crypto.randomUUID()}`,
       title: form.title.trim(),
       description: form.description.trim(),
-      dueDate: form.dueDate,
+      dueDate: form.dueDate || null,
       platform: form.platform,
       contentType: form.contentType,
       priority: form.priority,
       status: form.status,
       tags: form.tags.split(",").map((tag) => tag.trim()).filter(Boolean),
-      assignee: { id: assignee.id, name: assignee.name, role: assignee.role },
+      assignee: { id: fallbackAssignee.id, name: fallbackAssignee.name, role: fallbackAssignee.role },
       campaign: campaigns.find((campaign) => campaign.id === form.campaignId) ?? null,
     });
     setForm(initialState);

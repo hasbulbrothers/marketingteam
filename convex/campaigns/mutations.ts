@@ -2,7 +2,7 @@ import { mutationGeneric as mutation } from "convex/server";
 import { v } from "convex/values";
 import { isIsoDate } from "../lib/dates";
 import { requireCurrentUser } from "../lib/auth";
-import { requireManagerOrAdmin } from "../lib/permissions";
+import { requireAdmin } from "../lib/permissions";
 import { campaignStatusValidator, platformValidator } from "../lib/validators";
 
 export const createCampaign = mutation({
@@ -18,7 +18,7 @@ export const createCampaign = mutation({
     endDate: v.string(),
   },
   handler: async (ctx, args) => {
-    const currentUser = await requireManagerOrAdmin(ctx);
+    const currentUser = await requireAdmin(ctx);
 
     const name = args.name.trim();
     const objective = args.objective.trim();

@@ -51,7 +51,6 @@ function initials(name: string) {
 
 export function TaskTableNotion({ tasks }: { tasks: TaskWithSubtasks[] }) {
   const [query, setQuery] = useState("");
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
   const [localSubtasks, setLocalSubtasks] = useState<Record<string, Subtask[]>>(
     () => {
@@ -76,18 +75,6 @@ export function TaskTableNotion({ tasks }: { tasks: TaskWithSubtasks[] }) {
         t.tags.some((tag) => tag.toLowerCase().includes(q)),
     );
   }, [tasks, query]);
-
-  const grouped = useMemo(() => {
-    const map = new Map<TaskStatus, TaskWithSubtasks[]>();
-    for (const status of TASK_STATUSES) {
-      map.set(status.value, []);
-    }
-    for (const task of filtered) {
-      const bucket = map.get(task.status);
-      if (bucket) bucket.push(task);
-    }
-    return map;
-  }, [filtered]);
 
   function toggleExpanded(taskId: string) {
     setExpandedTaskId((current) => (current === taskId ? null : taskId));
@@ -122,24 +109,15 @@ export function TaskTableNotion({ tasks }: { tasks: TaskWithSubtasks[] }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="relative w-full max-w-sm">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search tasks"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
-          />
-        </div>
-        <button
-          type="button"
-          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
-        >
-          <Plus className="h-4 w-4" />
-          New task
-        </button>
+      <div className="relative w-full max-w-sm">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <input
+          type="text"
+          placeholder="Search tasks"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+        />
       </div>
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -152,63 +130,21 @@ export function TaskTableNotion({ tasks }: { tasks: TaskWithSubtasks[] }) {
           <span>Priority</span>
         </div>
 
-        {TASK_STATUSES.map((status) => {
-          const items = grouped.get(status.value) ?? [];
-          const isCollapsed = collapsed[status.value];
-          const meta = STATUS_META[status.value];
-
-          return (
-            <div key={status.value} className="border-b border-slate-100 last:border-b-0">
-              <button
-                type="button"
-                onClick={() =>
-                  setCollapsed((current) => ({
-                    ...current,
-                    [status.value]: !current[status.value],
-                  }))
-                }
-                className="flex w-full items-center gap-2 px-5 py-2.5 text-left transition hover:bg-slate-50"
-              >
-                {isCollapsed ? (
-                  <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
-                ) : (
-                  <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-                )}
-                <span className={`h-2 w-2 rounded-full ${meta.dot}`} />
-                <span className="text-sm font-semibold text-slate-700">{status.label}</span>
-                <span className="text-xs text-slate-400">{items.length}</span>
-              </button>
-
-              {!isCollapsed && (
-                <div>
-                  {items.length === 0 ? (
-                    <div className="px-5 py-3 text-xs text-slate-400">No tasks</div>
-                  ) : (
-                    items.map((task) => (
-                      <TaskRow
-                        key={task.id}
-                        task={task}
-                        meta={meta}
-                        subtasks={localSubtasks[task.id] ?? []}
-                        isExpanded={expandedTaskId === task.id}
-                        onToggleExpanded={() => toggleExpanded(task.id)}
-                        onToggleSubtask={(subtaskId) => toggleSubtask(task.id, subtaskId)}
-                        onAddSubtask={(title) => addSubtask(task.id, title)}
-                      />
-                    ))
-                  )}
-                  <button
-                    type="button"
-                    className="flex w-full items-center gap-2 px-5 py-2 text-xs text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    New task
-                  </button>
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {filtered.length === 0 ? (
+          <div className="px-5 py-8 text-center text-sm text-slate-400">No tasks yet</div>
+        ) : (
+          filtered.map((task) => (
+            <TaskRow
+              key={task.id}
+              task={task}
+              subtasks={localSubtasks[task.id] ?? []}
+              isExpanded={expandedTaskId === task.id}
+              onToggleExpanded={() => toggleExpanded(task.id)}
+              onToggleSubtask={(subtaskId) => toggleSubtask(task.id, subtaskId)}
+              onAddSubtask={(title) => addSubtask(task.id, title)}
+            />
+          ))
+        )}
       </div>
     </div>
   );
@@ -216,7 +152,6 @@ export function TaskTableNotion({ tasks }: { tasks: TaskWithSubtasks[] }) {
 
 function TaskRow({
   task,
-  meta,
   subtasks,
   isExpanded,
   onToggleExpanded,
@@ -224,7 +159,6 @@ function TaskRow({
   onAddSubtask,
 }: {
   task: TaskWithSubtasks;
-  meta: { dot: string; text: string; bg: string };
   subtasks: Subtask[];
   isExpanded: boolean;
   onToggleExpanded: () => void;
@@ -233,6 +167,7 @@ function TaskRow({
 }) {
   const completed = subtasks.filter((s) => s.isCompleted).length;
   const hasSubtasks = subtasks.length > 0;
+  const meta = STATUS_META[task.status];
 
   return (
     <div className="border-t border-slate-100">
