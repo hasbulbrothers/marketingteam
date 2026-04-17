@@ -28,6 +28,7 @@ export function TaskDetailSheet({
                 <Badge>{task.priority}</Badge>
                 <Badge variant="secondary">{task.status.replaceAll("_", " ")}</Badge>
                 <Badge variant="secondary">{task.platform}</Badge>
+                {task.campaign ? <Badge variant="outline">{task.campaign.name}</Badge> : null}
               </div>
               <div className="space-y-3">
                 <SheetTitle className="text-3xl font-bold leading-tight tracking-tight text-slate-900">{task.title}</SheetTitle>
@@ -40,6 +41,7 @@ export function TaskDetailSheet({
               <Meta label="Due date" value={formatDisplayDate(task.dueDate)} />
               <Meta label="Time status" value={formatDueDate(task.dueDate)} />
               <Meta label="Content type" value={task.contentType} />
+              <Meta label="Campaign" value={task.campaign?.name ?? "No campaign"} />
               <Meta label="Tags" value={task.tags.join(", ")} />
             </div>
             <Separator className="bg-slate-200" />

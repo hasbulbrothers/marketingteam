@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { TaskBoard } from "@/components/tasks/task-board";
 import { api } from "@/convex/_generated/api";
+import { CampaignSummary } from "@/types/campaign";
 import { MarketingTask } from "@/types/task";
 import { TeamMember } from "@/types/user";
 
@@ -16,6 +17,7 @@ export function LiveTaskBoard() {
   const isAuthed = Boolean(isLoaded && userId);
   const tasks = useQuery(api.tasks.queries.getTasks, isAuthed ? {} : "skip") as MarketingTask[] | undefined;
   const users = useQuery(api.users.queries.getUsers, isAuthed ? {} : "skip") as QueryUser[] | undefined;
+  const campaigns = useQuery(api.campaigns.queries.listCampaigns, isAuthed ? {} : "skip") as CampaignSummary[] | undefined;
   const comments = useQuery(
     api.comments.queries.getCommentsByTask,
     isAuthed && selectedTaskId ? ({ taskId: selectedTaskId } as never) : "skip",
@@ -44,6 +46,7 @@ export function LiveTaskBoard() {
       key="live"
       tasks={tasks}
       assignees={assignees}
+      campaigns={campaigns ?? []}
       commentsByTask={taskComments}
       selectedTaskId={selectedTaskId}
       onSelectedTaskChange={setSelectedTaskId}
@@ -63,6 +66,7 @@ export function LiveTaskBoard() {
           dueDate: task.dueDate,
           scheduledAt: task.status === "scheduled" ? task.dueDate : undefined,
           assigneeId: task.assignee.id === "unassigned" ? undefined : task.assignee.id,
+          campaignId: task.campaign?.id ?? undefined,
         } as never);
         return;
       }}

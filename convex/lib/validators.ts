@@ -59,3 +59,11 @@ export const kpiPeriodValidator = v.union(
   v.literal("monthly"),
   v.literal("quarterly"),
 );
+
+export const campaignStatusValidator = v.union(
+  v.literal("planning"),
+  v.literal("active"),
+  v.literal("review"),
+  v.literal("completed"),
+  v.literal("paused"),
+);

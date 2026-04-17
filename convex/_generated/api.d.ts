@@ -10,6 +10,8 @@
 
 import type * as assets_mutations from "../assets/mutations.js";
 import type * as assets_queries from "../assets/queries.js";
+import type * as campaigns_mutations from "../campaigns/mutations.js";
+import type * as campaigns_queries from "../campaigns/queries.js";
 import type * as comments_mutations from "../comments/mutations.js";
 import type * as comments_queries from "../comments/queries.js";
 import type * as dashboard_queries from "../dashboard/queries.js";
@@ -35,6 +37,8 @@ import type {
 declare const fullApi: ApiFromModules<{
   "assets/mutations": typeof assets_mutations;
   "assets/queries": typeof assets_queries;
+  "campaigns/mutations": typeof campaigns_mutations;
+  "campaigns/queries": typeof campaigns_queries;
   "comments/mutations": typeof comments_mutations;
   "comments/queries": typeof comments_queries;
   "dashboard/queries": typeof dashboard_queries;

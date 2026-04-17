@@ -14,6 +14,7 @@ const filters = {
   status: v.optional(taskStatusValidator),
   platform: v.optional(platformValidator),
   assigneeId: v.optional(v.id("users")),
+  campaignId: v.optional(v.id("campaigns")),
   priority: v.optional(priorityValidator),
   contentType: v.optional(contentTypeValidator),
   includeArchived: v.optional(v.boolean()),
@@ -30,6 +31,7 @@ type RawTask = {
   priority: string;
   contentType: string;
   assigneeId?: unknown;
+  campaignId?: unknown;
   dueDate?: string;
   isArchived: boolean;
 };
@@ -131,6 +133,7 @@ function filterTasks(tasks: RawTask[], args: Record<string, unknown>) {
     if (args.status && task.status !== args.status) return false;
     if (args.platform && task.platform !== args.platform) return false;
     if (args.assigneeId && task.assigneeId !== args.assigneeId) return false;
+    if (args.campaignId && task.campaignId !== args.campaignId) return false;
     if (args.priority && task.priority !== args.priority) return false;
     if (args.contentType && task.contentType !== args.contentType) return false;
     return true;
@@ -143,6 +146,7 @@ async function serializeTasks(ctx: QueryCtx, tasks: RawTask[]) {
 
 async function serializeTask(ctx: QueryCtx, task: RawTask) {
   const assignee = task.assigneeId ? await ctx.db.get(task.assigneeId as never) : null;
+  const campaign = task.campaignId ? await ctx.db.get(task.campaignId as never) : null;
   return {
     id: String(task._id),
     title: task.title,
@@ -158,5 +162,12 @@ async function serializeTask(ctx: QueryCtx, task: RawTask) {
       name: assignee?.name ?? "Unassigned",
       role: assignee?.jobTitle ?? assignee?.role ?? "Team Member",
     },
+    campaign: campaign
+      ? {
+          id: String(campaign._id),
+          name: campaign.name,
+          status: campaign.status,
+        }
+      : null,
   };
 }

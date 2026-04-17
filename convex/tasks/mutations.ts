@@ -19,6 +19,7 @@ const taskFields = {
   priority: priorityValidator,
   tags: v.array(v.string()),
   assigneeId: v.optional(v.id("users")),
+  campaignId: v.optional(v.id("campaigns")),
   dueDate: v.optional(v.string()),
   scheduledAt: v.optional(v.string()),
 };
@@ -32,6 +33,7 @@ export const createTask = mutation({
     const currentUser = await requireCurrentUser(ctx);
     validateTaskPayload(args.title, args.description, args.tags, args.dueDate, args.scheduledAt);
     await ensureAssigneeExists(ctx, args.assigneeId);
+    await ensureCampaignExists(ctx, args.campaignId);
 
     return ctx.db.insert("tasks", {
       ...args,
@@ -51,6 +53,7 @@ export const updateTask = mutation({
     validateTaskPayload(args.title, args.description, args.tags, args.dueDate, args.scheduledAt);
     await ensureTaskExists(ctx, args.taskId);
     await ensureAssigneeExists(ctx, args.assigneeId);
+    await ensureCampaignExists(ctx, args.campaignId);
 
     const { taskId, ...updateFields } = args;
     await ctx.db.patch(taskId, { ...updateFields, updatedAt: Date.now() });
@@ -106,6 +109,15 @@ async function ensureAssigneeExists(
   if (!assigneeId) return;
   const user = await ctx.db.get(assigneeId);
   if (!user || !user.isActive) throw new Error("Assignee not found or inactive.");
+}
+
+async function ensureCampaignExists(
+  ctx: MutationCtx,
+  campaignId?: RecordId,
+) {
+  if (!campaignId) return;
+  const campaign = await ctx.db.get(campaignId);
+  if (!campaign || !campaign.isActive) throw new Error("Campaign not found or inactive.");
 }
 
 function validateTaskPayload(

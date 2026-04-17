@@ -1,6 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import {
+  campaignStatusValidator,
   contentTypeValidator,
   kpiMetricValidator,
   kpiPeriodValidator,
@@ -43,6 +44,45 @@ export default defineSchema({
     .index("by_slug", ["slug"])
     .index("by_active", ["isActive"]),
 
+  campaigns: defineTable({
+    name: v.string(),
+    objective: v.string(),
+    description: v.optional(v.string()),
+    status: campaignStatusValidator,
+    ownerId: v.id("users"),
+    teamId: v.optional(v.id("teams")),
+    budget: v.number(),
+    startDate: v.string(),
+    endDate: v.string(),
+    isActive: v.boolean(),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_owner", ["ownerId"])
+    .index("by_team", ["teamId"])
+    .index("by_status", ["status"])
+    .index("by_active", ["isActive"]),
+
+  campaignMetrics: defineTable({
+    campaignId: v.id("campaigns"),
+    date: v.string(),
+    channel: platformValidator,
+    spend: v.number(),
+    reach: v.number(),
+    clicks: v.number(),
+    leads: v.number(),
+    participants: v.number(),
+    conversions: v.number(),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_campaign", ["campaignId"])
+    .index("by_date", ["date"])
+    .index("by_channel", ["channel"])
+    .index("by_campaign_date", ["campaignId", "date"]),
+
   kpiTargets: defineTable({
     scope: kpiScopeValidator,
     teamId: v.optional(v.id("teams")),
@@ -72,6 +112,7 @@ export default defineSchema({
     priority: priorityValidator,
     tags: v.array(v.string()),
     assigneeId: v.optional(v.id("users")),
+    campaignId: v.optional(v.id("campaigns")),
     dueDate: v.optional(v.string()),
     scheduledAt: v.optional(v.string()),
     publishedAt: v.optional(v.string()),
@@ -82,6 +123,7 @@ export default defineSchema({
   })
     .index("by_status", ["status"])
     .index("by_assignee", ["assigneeId"])
+    .index("by_campaign", ["campaignId"])
     .index("by_platform", ["platform"])
     .index("by_due_date", ["dueDate"])
     .index("by_created_by", ["createdBy"])

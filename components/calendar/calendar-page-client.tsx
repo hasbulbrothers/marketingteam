@@ -7,10 +7,13 @@ import { api } from "@/convex/_generated/api";
 import { CalendarDayPopup } from "@/components/calendar/calendar-day-popup";
 import { CalendarGrid } from "@/components/calendar/calendar-grid";
 import { CalendarToolbar } from "@/components/calendar/calendar-toolbar";
+import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
 import { TaskDetailSheet } from "@/components/tasks/task-detail-sheet";
 import { buildVisibleDays, changePeriod, filterCalendarTasks, formatPeriodLabel } from "@/lib/utils/calendar";
+import { CampaignSummary } from "@/types/campaign";
 import { TaskComment } from "@/types/comment";
 import { MarketingTask, Platform, TaskStatus } from "@/types/task";
+import { TeamMember } from "@/types/user";
 
 const initialMonth = new Date("2026-03-01T00:00:00");
 
@@ -32,6 +35,7 @@ function LiveCalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
   const { isLoaded, userId } = useAuth();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [createDate, setCreateDate] = useState<string | null>(null);
   const [month, setMonth] = useState(initialMonth);
   const [filters, setFilters] = useState<{ platform: Platform | "all"; assigneeId: string | "all"; status: TaskStatus | "all"; view: "month" | "week" }>({
     platform: "all",
@@ -42,17 +46,25 @@ function LiveCalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
 
   const isAuthed = Boolean(isLoaded && userId);
   const liveTasks = useQuery(api.tasks.queries.getTasks, isAuthed ? {} : "skip") as MarketingTask[] | undefined;
+  const users = useQuery(api.users.queries.getUsers, isAuthed ? {} : "skip") as TeamMember[] | undefined;
+  const campaigns = useQuery(api.campaigns.queries.listCampaigns, isAuthed ? {} : "skip") as CampaignSummary[] | undefined;
   const comments = useQuery(
     api.comments.queries.getCommentsByTask,
     isAuthed && selectedTaskId ? ({ taskId: selectedTaskId } as never) : "skip",
   ) as TaskComment[] | undefined;
   const addComment = useMutation(api.comments.mutations.addComment);
+  const createTask = useMutation(api.tasks.mutations.createTask);
   const sourceTasks = useMemo(() => (isAuthed ? liveTasks ?? tasks : []), [isAuthed, liveTasks, tasks]);
   const visibleTasks = useMemo(() => filterCalendarTasks(sourceTasks, month, filters.view, filters), [filters, month, sourceTasks]);
   const visibleDays = useMemo(() => buildVisibleDays(month, filters.view), [filters.view, month]);
   const selectedTasks = useMemo(() => visibleTasks.filter((task) => task.dueDate === selectedDate), [selectedDate, visibleTasks]);
   const selectedTask = useMemo(() => sourceTasks.find((task) => task.id === selectedTaskId) ?? null, [selectedTaskId, sourceTasks]);
-  const assignees = useMemo(() => Array.from(new Map(sourceTasks.map((task) => [task.assignee.id, task.assignee])).values()), [sourceTasks]);
+  const assignees = useMemo(
+    () =>
+      users?.map((user) => ({ id: String(user.id), name: user.name, role: user.role })) ??
+      Array.from(new Map(sourceTasks.map((task) => [task.assignee.id, task.assignee])).values()),
+    [sourceTasks, users],
+  );
 
   function handleSelectTask(task: MarketingTask) {
     setSelectedTaskId(task.id);
@@ -68,7 +80,15 @@ function LiveCalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
         onMonthChange={(direction) => setMonth((current) => changePeriod(current, direction, filters.view))}
         onFilterChange={(key, value) => setFilters((current) => ({ ...current, [key]: value }))}
       />
-      <CalendarGrid currentDate={month} visibleDays={visibleDays} tasks={visibleTasks} onSelectDate={setSelectedDate} selectedDate={selectedDate} showOutsideDays={filters.view === "month"} />
+      <CalendarGrid
+        currentDate={month}
+        visibleDays={visibleDays}
+        tasks={visibleTasks}
+        onSelectDate={setSelectedDate}
+        onCreateTaskAtDate={setCreateDate}
+        selectedDate={selectedDate}
+        showOutsideDays={filters.view === "month"}
+      />
       <CalendarDayPopup
         date={selectedDate}
         open={Boolean(selectedDate)}
@@ -85,12 +105,38 @@ function LiveCalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
         }}
         onOpenChange={(open) => !open && setSelectedTaskId(null)}
       />
+      {createDate ? (
+        <TaskCreateDialog
+          key={createDate}
+          open
+        onOpenChange={(open) => !open && setCreateDate(null)}
+        assignees={assignees}
+        campaigns={campaigns ?? []}
+        presetDueDate={createDate}
+        onCreate={async (task) => {
+          await createTask({
+              title: task.title,
+              description: task.description,
+              status: task.status,
+              priority: task.priority,
+              platform: task.platform,
+              contentType: task.contentType,
+            tags: task.tags,
+            dueDate: task.dueDate ?? undefined,
+            scheduledAt: task.status === "scheduled" ? task.dueDate ?? undefined : undefined,
+            assigneeId: task.assignee.id,
+            campaignId: task.campaign?.id ?? undefined,
+          } as never);
+        }}
+      />
+      ) : null}
     </>
   );
 }
 
 function CalendarPreview({ tasks }: { tasks: MarketingTask[] }) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [createDate, setCreateDate] = useState<string | null>(null);
   const [month, setMonth] = useState(initialMonth);
   const [filters, setFilters] = useState<{ platform: Platform | "all"; assigneeId: string | "all"; status: TaskStatus | "all"; view: "month" | "week" }>({
     platform: "all",
@@ -113,7 +159,15 @@ function CalendarPreview({ tasks }: { tasks: MarketingTask[] }) {
         onMonthChange={(direction) => setMonth((current) => changePeriod(current, direction, filters.view))}
         onFilterChange={(key, value) => setFilters((current) => ({ ...current, [key]: value }))}
       />
-      <CalendarGrid currentDate={month} visibleDays={visibleDays} tasks={visibleTasks} onSelectDate={setSelectedDate} selectedDate={selectedDate} showOutsideDays={filters.view === "month"} />
+      <CalendarGrid
+        currentDate={month}
+        visibleDays={visibleDays}
+        tasks={visibleTasks}
+        onSelectDate={setSelectedDate}
+        onCreateTaskAtDate={setCreateDate}
+        selectedDate={selectedDate}
+        showOutsideDays={filters.view === "month"}
+      />
       <CalendarDayPopup
         date={selectedDate}
         open={Boolean(selectedDate)}
@@ -122,6 +176,17 @@ function CalendarPreview({ tasks }: { tasks: MarketingTask[] }) {
         onOpenChange={(open) => !open && setSelectedDate(null)}
       />
       <TaskDetailSheet task={null} comments={[]} onAddComment={() => undefined} onOpenChange={() => undefined} />
+      {createDate ? (
+        <TaskCreateDialog
+          key={createDate}
+          open
+        onOpenChange={(open) => !open && setCreateDate(null)}
+        assignees={assignees}
+        campaigns={[]}
+        presetDueDate={createDate}
+        onCreate={() => undefined}
+      />
+      ) : null}
     </>
   );
 }

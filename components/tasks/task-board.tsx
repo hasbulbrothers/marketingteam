@@ -10,6 +10,7 @@ import { TaskToolbar } from "@/components/tasks/task-toolbar";
 import { useTaskBoard } from "@/hooks/use-task-board";
 import { useTaskFilters } from "@/hooks/use-task-filters";
 import { TASK_STATUSES } from "@/lib/constants/task-status";
+import { CampaignSummary } from "@/types/campaign";
 import { TaskComment } from "@/types/comment";
 import { MarketingTask } from "@/types/task";
 import { TeamMember } from "@/types/user";
@@ -18,6 +19,7 @@ type TaskBoardProps = {
   tasks: MarketingTask[];
   commentsByTask?: Record<string, TaskComment[]>;
   assignees?: TeamMember[];
+  campaigns?: CampaignSummary[];
   selectedTaskId?: string | null;
   onSelectedTaskChange?: (taskId: string | null) => void;
   onMoveTaskStatus?: (taskId: string, status: MarketingTask["status"]) => Promise<void> | void;
@@ -29,6 +31,7 @@ export function TaskBoard({
   tasks: initialTasks,
   commentsByTask: externalComments,
   assignees: externalAssignees,
+  campaigns = [],
   selectedTaskId: controlledSelectedTaskId,
   onSelectedTaskChange,
   onMoveTaskStatus,
@@ -131,6 +134,7 @@ export function TaskBoard({
           open={isCreateOpen}
           onOpenChange={setCreateOpen}
           assignees={assignees}
+          campaigns={campaigns}
           onCreate={handleCreate}
         />
       </div>

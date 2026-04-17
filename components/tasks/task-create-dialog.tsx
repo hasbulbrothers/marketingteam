@@ -9,6 +9,7 @@ import { CONTENT_TYPES } from "@/lib/constants/content-types";
 import { PLATFORMS } from "@/lib/constants/platforms";
 import { TASK_PRIORITIES } from "@/lib/constants/task-priority";
 import { TASK_STATUSES } from "@/lib/constants/task-status";
+import { CampaignSummary } from "@/types/campaign";
 import { MarketingTask } from "@/types/task";
 import { TeamMember } from "@/types/user";
 
@@ -21,11 +22,32 @@ const initialState = {
   priority: TASK_PRIORITIES[1],
   status: TASK_STATUSES[0].value,
   assigneeId: "",
+  campaignId: "",
   tags: "",
 };
 
-export function TaskCreateDialog({ open, onOpenChange, assignees, onCreate }: { open: boolean; onOpenChange: (open: boolean) => void; assignees: TeamMember[]; onCreate: (task: MarketingTask) => void; }) {
-  const [form, setForm] = useState(initialState);
+export function TaskCreateDialog({
+  open,
+  onOpenChange,
+  assignees,
+  onCreate,
+  presetDueDate,
+  campaigns = [],
+  presetCampaignId,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  assignees: TeamMember[];
+  onCreate: (task: MarketingTask) => void;
+  presetDueDate?: string;
+  campaigns?: CampaignSummary[];
+  presetCampaignId?: string;
+}) {
+  const [form, setForm] = useState({
+    ...initialState,
+    dueDate: presetDueDate ?? "",
+    campaignId: presetCampaignId ?? "",
+  });
 
   function update<K extends keyof typeof initialState>(key: K, value: (typeof initialState)[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -45,6 +67,7 @@ export function TaskCreateDialog({ open, onOpenChange, assignees, onCreate }: { 
       status: form.status,
       tags: form.tags.split(",").map((tag) => tag.trim()).filter(Boolean),
       assignee: { id: assignee.id, name: assignee.name, role: assignee.role },
+      campaign: campaigns.find((campaign) => campaign.id === form.campaignId) ?? null,
     });
     setForm(initialState);
     onOpenChange(false);
@@ -60,6 +83,7 @@ export function TaskCreateDialog({ open, onOpenChange, assignees, onCreate }: { 
         <div className="grid gap-4 py-2 md:grid-cols-2">
           <Input className="h-12 rounded-2xl border-none bg-background shadow-sm" placeholder="Task title" value={form.title} onChange={(event) => update("title", event.target.value)} />
           <Select value={form.assigneeId} onChange={(value) => update("assigneeId", value)} options={assignees.map((assignee) => ({ value: assignee.id, label: assignee.name }))} placeholder="Select assignee" />
+          <Select value={form.campaignId} onChange={(value) => update("campaignId", value)} options={campaigns.map((campaign) => ({ value: campaign.id, label: campaign.name }))} placeholder="Optional campaign" />
           <Select value={form.platform} onChange={(value) => update("platform", value as MarketingTask["platform"])} options={PLATFORMS.map((platform) => ({ value: platform, label: platform }))} />
           <Input className="h-12 rounded-2xl border-none bg-background shadow-sm" type="date" value={form.dueDate} onChange={(event) => update("dueDate", event.target.value)} />
           <Select value={form.priority} onChange={(value) => update("priority", value as MarketingTask["priority"])} options={TASK_PRIORITIES.map((priority) => ({ value: priority, label: priority }))} />

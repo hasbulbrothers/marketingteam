@@ -35,6 +35,11 @@ export function TaskCard({ task, onClick }: { task: MarketingTask; onClick: () =
           <p className="mt-2 line-clamp-2 text-[12px] leading-6 text-slate-500">{task.description}</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {task.campaign ? (
+            <span className="rounded-lg bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
+              {task.campaign.name}
+            </span>
+          ) : null}
           {task.tags.slice(0, 2).map((tag) => (
             <span key={tag} className="rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-500">
               {tag}

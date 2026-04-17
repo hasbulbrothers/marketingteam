@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
 import { Topbar } from "@/components/layout/topbar";
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
+import { CampaignSummary } from "@/types/campaign";
 import { TeamMember } from "@/types/user";
 
 type QueryUser = TeamMember & { _id?: string };
@@ -38,6 +39,7 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
   const [isCreateOpen, setCreateOpen] = useState(false);
   const isAuthed = Boolean(isLoaded && userId);
   const users = useQuery(api.users.queries.getUsers, isAuthed ? {} : "skip") as QueryUser[] | undefined;
+  const campaigns = useQuery(api.campaigns.queries.listCampaigns, isAuthed ? {} : "skip") as CampaignSummary[] | undefined;
   const createTask = useMutation(api.tasks.mutations.createTask);
 
   const assignees = useMemo(
@@ -56,6 +58,7 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
         open={isCreateOpen}
         onOpenChange={setCreateOpen}
         assignees={assignees}
+        campaigns={campaigns ?? []}
         onCreate={async (task) => {
           await createTask({
             title: task.title,
@@ -68,6 +71,7 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
             dueDate: task.dueDate,
             scheduledAt: task.status === "scheduled" ? task.dueDate : undefined,
             assigneeId: task.assignee.id === "unassigned" ? undefined : task.assignee.id,
+            campaignId: task.campaign?.id ?? undefined,
           } as never);
         }}
       />

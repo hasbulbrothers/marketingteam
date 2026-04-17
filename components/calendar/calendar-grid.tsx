@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import { format, isSameDay, isSameMonth, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { MarketingTask } from "@/types/task";
@@ -9,6 +10,7 @@ export function CalendarGrid({
   visibleDays,
   tasks,
   onSelectDate,
+  onCreateTaskAtDate,
   selectedDate,
   showOutsideDays,
 }: {
@@ -16,6 +18,7 @@ export function CalendarGrid({
   visibleDays: Date[];
   tasks: MarketingTask[];
   onSelectDate: (date: string) => void;
+  onCreateTaskAtDate?: (date: string) => void;
   selectedDate: string | null;
   showOutsideDays: boolean;
 }) {
@@ -32,11 +35,25 @@ export function CalendarGrid({
           const inMonth = showOutsideDays ? isSameMonth(day, currentDate) : true;
 
           return (
-            <button key={date} type="button" onClick={() => onSelectDate(date)} className="min-h-36 border-r border-b border-slate-200 p-4 text-left last:border-r-0 hover:bg-slate-50/50">
-              <p className={isSelected ? "text-sm font-semibold text-primary" : inMonth ? "text-sm font-semibold text-slate-800" : "text-sm font-semibold text-slate-300"}>
-                {format(day, "d")}
-              </p>
-              <div className="mt-3 space-y-2">
+            <div key={date} className="min-h-36 border-r border-b border-slate-200 p-4 last:border-r-0">
+              <div className="flex items-start justify-between gap-3">
+                <button type="button" onClick={() => onSelectDate(date)} className="text-left">
+                  <p className={isSelected ? "text-sm font-semibold text-primary" : inMonth ? "text-sm font-semibold text-slate-800" : "text-sm font-semibold text-slate-300"}>
+                    {format(day, "d")}
+                  </p>
+                </button>
+                {onCreateTaskAtDate ? (
+                  <button
+                    type="button"
+                    onClick={() => onCreateTaskAtDate(date)}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:border-primary/25 hover:text-primary"
+                    aria-label={`Add task for ${date}`}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                ) : null}
+              </div>
+              <button type="button" onClick={() => onSelectDate(date)} className="mt-3 block w-full space-y-2 text-left hover:opacity-90">
                 {dayTasks.map((task) => (
                   <div key={task.id} className="rounded-[18px] bg-background px-3 py-3 shadow-sm ring-1 ring-black/5">
                     <p className="truncate text-xs font-semibold text-slate-800">{task.title}</p>
@@ -46,8 +63,8 @@ export function CalendarGrid({
                     </div>
                   </div>
                 ))}
-              </div>
-            </button>
+              </button>
+            </div>
           );
         })}
       </div>

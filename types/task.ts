@@ -39,6 +39,11 @@ export type MarketingTask = {
     name: string;
     role: string;
   };
+  campaign?: {
+    id: string;
+    name: string;
+    status: string;
+  } | null;
 };
 
 export type TaskFiltersState = {
