@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { MobileNav } from "@/components/layout/mobile-nav";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
 import { Topbar } from "@/components/layout/topbar";
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
@@ -26,10 +27,11 @@ function PreviewAppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <SidebarNav />
-      <main className="min-h-screen lg:ml-72">
+      <main className="min-h-screen pb-20 lg:ml-72 lg:pb-0">
         <Topbar onCreateTask={() => undefined} />
         <div>{children}</div>
       </main>
+      <MobileNav />
     </div>
   );
 }
@@ -50,10 +52,11 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <SidebarNav />
-      <main className="min-h-screen lg:ml-72">
+      <main className="min-h-screen pb-20 lg:ml-72 lg:pb-0">
         <Topbar onCreateTask={() => setCreateOpen(true)} />
         <div>{children}</div>
       </main>
+      <MobileNav />
       <TaskCreateDialog
         open={isCreateOpen}
         onOpenChange={setCreateOpen}
