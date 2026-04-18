@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
-import { Bell, Plus, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
+import { NotificationBell } from "@/components/layout/notification-panel";
 import { UserRolePill } from "@/components/layout/user-role-pill";
 import { Input } from "@/components/ui/input";
 
@@ -28,9 +29,7 @@ export function Topbar({ onCreateTask }: { onCreateTask: () => void }) {
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">Create task</span>
         </button>
-        <button className="rounded-2xl border border-slate-200 bg-white p-2.5 text-slate-400 transition-colors hover:text-slate-700 sm:p-3" type="button">
-          <Bell className="h-5 w-5" />
-        </button>
+        <NotificationBell />
         {hasClerk ? (
           <UserButton />
         ) : (

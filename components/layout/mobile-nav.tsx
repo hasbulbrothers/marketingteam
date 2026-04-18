@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FolderKanban, House, Users, BarChart3, CalendarRange } from "lucide-react";
+import { FolderKanban, House, Users, Settings, CalendarRange } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const mobileNavItems = [
@@ -10,7 +10,7 @@ const mobileNavItems = [
   { href: "/tasks", label: "Tasks", icon: FolderKanban },
   { href: "/calendar", label: "Calendar", icon: CalendarRange },
   { href: "/team", label: "Team", icon: Users },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function MobileNav() {

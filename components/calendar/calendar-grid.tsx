@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import { format, isSameDay, isSameMonth, parseISO } from "date-fns";
+import { format, isToday, isSameDay, isSameMonth, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { MarketingTask } from "@/types/task";
 
@@ -32,15 +32,22 @@ export function CalendarGrid({
           const date = format(day, "yyyy-MM-dd");
           const dayTasks = tasks.filter((task) => task.dueDate && isSameDay(parseISO(task.dueDate), day)).slice(0, 2);
           const isSelected = selectedDate === date;
+          const today = isToday(day);
           const inMonth = showOutsideDays ? isSameMonth(day, currentDate) : true;
 
           return (
-            <div key={date} className="min-h-36 border-r border-b border-slate-200 p-4 last:border-r-0">
+            <div key={date} className={`min-h-36 border-r border-b border-slate-200 p-4 last:border-r-0 ${today ? "bg-primary/[0.04]" : ""}`}>
               <div className="flex items-start justify-between gap-3">
                 <button type="button" onClick={() => onSelectDate(date)} className="text-left">
-                  <p className={isSelected ? "text-sm font-semibold text-primary" : inMonth ? "text-sm font-semibold text-slate-800" : "text-sm font-semibold text-slate-300"}>
-                    {format(day, "d")}
-                  </p>
+                  {today ? (
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
+                      {format(day, "d")}
+                    </span>
+                  ) : (
+                    <p className={isSelected ? "text-sm font-semibold text-primary" : inMonth ? "text-sm font-semibold text-slate-800" : "text-sm font-semibold text-slate-300"}>
+                      {format(day, "d")}
+                    </p>
+                  )}
                 </button>
                 {onCreateTaskAtDate ? (
                   <button

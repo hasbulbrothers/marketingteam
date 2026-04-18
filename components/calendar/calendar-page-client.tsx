@@ -15,7 +15,8 @@ import { TaskComment } from "@/types/comment";
 import { MarketingTask, Platform, TaskStatus } from "@/types/task";
 import { TeamMember } from "@/types/user";
 
-const initialMonth = new Date("2026-03-01T00:00:00");
+const now = new Date();
+const initialMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
 export function CalendarPageClient({
   tasks,

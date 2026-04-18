@@ -3,6 +3,7 @@ import { mutationGeneric as mutation } from "convex/server";
 import { v } from "convex/values";
 import { requireCurrentUser } from "../lib/auth";
 import { isIsoDate } from "../lib/dates";
+import { notify } from "../lib/notifications";
 import { requireAdmin, requireTaskAccess } from "../lib/permissions";
 import {
   contentTypeValidator,
@@ -35,7 +36,7 @@ export const createTask = mutation({
     await ensureAssigneeExists(ctx, args.assigneeId);
     await ensureCampaignExists(ctx, args.campaignId);
 
-    return ctx.db.insert("tasks", {
+    const taskId = await ctx.db.insert("tasks", {
       ...args,
       createdBy: currentUser._id,
       isArchived: false,
@@ -43,6 +44,19 @@ export const createTask = mutation({
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
+
+    if (args.assigneeId) {
+      await notify(ctx, {
+        recipientId: args.assigneeId as unknown,
+        senderId: currentUser._id as unknown,
+        type: "task_assigned",
+        title: "New task assigned",
+        message: `You have been assigned to "${args.title}"`,
+        taskId: taskId as unknown,
+      });
+    }
+
+    return taskId;
   },
 });
 
@@ -76,23 +90,53 @@ export const deleteTask = mutation({
 export const moveTaskStatus = mutation({
   args: { taskId: v.id("tasks"), status: taskStatusValidator },
   handler: async (ctx, args) => {
-    await requireTaskAccess(ctx, args.taskId);
-    await ensureTaskExists(ctx, args.taskId);
+    const currentUser = await requireTaskAccess(ctx, args.taskId);
+    const task = await ensureTaskExists(ctx, args.taskId);
     await ctx.db.patch(args.taskId, {
       status: args.status,
       publishedAt: args.status === "published" ? new Date().toISOString() : undefined,
       updatedAt: Date.now(),
     });
+
+    if (task.assigneeId) {
+      await notify(ctx, {
+        recipientId: task.assigneeId as unknown,
+        senderId: currentUser._id as unknown,
+        type: "task_status_changed",
+        title: "Task status updated",
+        message: `"${task.title}" moved to ${(args.status as string).replace("_", " ")}`,
+        taskId: args.taskId as unknown,
+      });
+    }
+    if (task.createdBy && String(task.createdBy) !== String(task.assigneeId)) {
+      await notify(ctx, {
+        recipientId: task.createdBy as unknown,
+        senderId: currentUser._id as unknown,
+        type: "task_status_changed",
+        title: "Task status updated",
+        message: `"${task.title}" moved to ${(args.status as string).replace("_", " ")}`,
+        taskId: args.taskId as unknown,
+      });
+    }
   },
 });
 
 export const assignTask = mutation({
   args: { taskId: v.id("tasks"), assigneeId: v.id("users") },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
-    await ensureTaskExists(ctx, args.taskId);
+    const currentUser = await requireAdmin(ctx);
+    const task = await ensureTaskExists(ctx, args.taskId);
     await ensureAssigneeExists(ctx, args.assigneeId);
     await ctx.db.patch(args.taskId, { assigneeId: args.assigneeId, updatedAt: Date.now() });
+
+    await notify(ctx, {
+      recipientId: args.assigneeId as unknown,
+      senderId: currentUser._id as unknown,
+      type: "task_assigned",
+      title: "Task assigned to you",
+      message: `You have been assigned to "${task.title}"`,
+      taskId: args.taskId as unknown,
+    });
   },
 });
 

@@ -66,3 +66,10 @@ export const campaignStatusValidator = v.union(
   v.literal("completed"),
   v.literal("paused"),
 );
+
+export const notificationTypeValidator = v.union(
+  v.literal("task_assigned"),
+  v.literal("task_status_changed"),
+  v.literal("task_commented"),
+  v.literal("role_changed"),
+);

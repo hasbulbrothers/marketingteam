@@ -91,7 +91,7 @@ export function TaskBoard({
         onCreate={() => setCreateOpen(true)}
         activeFilterCount={0}
       />
-      <TaskTableNotion tasks={tasks} />
+      <TaskTableNotion tasks={tasks} onSelectTask={(taskId) => openTask(taskId)} />
       <TaskDetailSheet
         task={selectedTask}
         comments={selectedTask ? commentsByTask[selectedTask.id] ?? [] : []}

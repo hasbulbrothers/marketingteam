@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, ChevronDown, ChevronRight, Plus, Search } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Pencil, Plus, Search } from "lucide-react";
 import { MarketingTask, TaskPriority, TaskStatus } from "@/types/task";
 import { TASK_STATUSES } from "@/lib/constants/task-status";
 import { formatDueDate } from "@/lib/utils/date";
@@ -44,7 +44,7 @@ function initials(name: string) {
   return name.split(" ").map((part) => part[0]).slice(0, 2).join("").toUpperCase();
 }
 
-export function TaskTableNotion({ tasks }: { tasks: TaskWithSubtasks[] }) {
+export function TaskTableNotion({ tasks, onSelectTask }: { tasks: TaskWithSubtasks[]; onSelectTask?: (taskId: string) => void }) {
   const [query, setQuery] = useState("");
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
   const [localSubtasks, setLocalSubtasks] = useState<Record<string, Subtask[]>>(() => {
@@ -117,19 +117,21 @@ export function TaskTableNotion({ tasks }: { tasks: TaskWithSubtasks[] }) {
                 onToggleExpanded={() => toggleExpanded(task.id)}
                 onToggleSubtask={(subtaskId) => toggleSubtask(task.id, subtaskId)}
                 onAddSubtask={(title) => addSubtask(task.id, title)}
+                onEdit={onSelectTask ? () => onSelectTask(task.id) : undefined}
               />
             ))}
           </div>
 
           {/* Desktop table */}
           <div className="hidden overflow-hidden rounded-xl border border-slate-200 bg-white md:block">
-            <div className="grid grid-cols-[24px_minmax(0,1fr)_140px_160px_140px_120px] gap-4 border-b border-slate-100 px-5 py-2.5 text-[11px] font-medium uppercase tracking-wide text-slate-400">
+            <div className="grid grid-cols-[24px_minmax(0,1fr)_140px_160px_140px_120px_48px] gap-4 border-b border-slate-100 px-5 py-2.5 text-[11px] font-medium uppercase tracking-wide text-slate-400">
               <span />
               <span>Task</span>
               <span>Status</span>
               <span>Assignee</span>
               <span>Due date</span>
               <span>Priority</span>
+              <span />
             </div>
             {filtered.map((task) => (
               <DesktopTaskRow
@@ -140,6 +142,7 @@ export function TaskTableNotion({ tasks }: { tasks: TaskWithSubtasks[] }) {
                 onToggleExpanded={() => toggleExpanded(task.id)}
                 onToggleSubtask={(subtaskId) => toggleSubtask(task.id, subtaskId)}
                 onAddSubtask={(title) => addSubtask(task.id, title)}
+                onEdit={onSelectTask ? () => onSelectTask(task.id) : undefined}
               />
             ))}
           </div>
@@ -150,10 +153,10 @@ export function TaskTableNotion({ tasks }: { tasks: TaskWithSubtasks[] }) {
 }
 
 function MobileTaskCard({
-  task, subtasks, isExpanded, onToggleExpanded, onToggleSubtask, onAddSubtask,
+  task, subtasks, isExpanded, onToggleExpanded, onToggleSubtask, onAddSubtask, onEdit,
 }: {
   task: TaskWithSubtasks; subtasks: Subtask[]; isExpanded: boolean;
-  onToggleExpanded: () => void; onToggleSubtask: (id: string) => void; onAddSubtask: (title: string) => void;
+  onToggleExpanded: () => void; onToggleSubtask: (id: string) => void; onAddSubtask: (title: string) => void; onEdit?: () => void;
 }) {
   const completed = subtasks.filter((s) => s.isCompleted).length;
   const hasSubtasks = subtasks.length > 0;
@@ -207,6 +210,12 @@ function MobileTaskCard({
           {task.description && <p className="pb-2 text-xs text-slate-500">{task.description}</p>}
           <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Assignee: {task.assignee.name}</p>
           <SubtaskList subtasks={subtasks} onToggle={onToggleSubtask} onAdd={onAddSubtask} />
+          {onEdit && (
+            <button type="button" onClick={onEdit} className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs font-medium text-slate-600 transition hover:border-primary/25 hover:text-primary">
+              <Pencil className="h-3.5 w-3.5" />
+              Edit task
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -214,10 +223,10 @@ function MobileTaskCard({
 }
 
 function DesktopTaskRow({
-  task, subtasks, isExpanded, onToggleExpanded, onToggleSubtask, onAddSubtask,
+  task, subtasks, isExpanded, onToggleExpanded, onToggleSubtask, onAddSubtask, onEdit,
 }: {
   task: TaskWithSubtasks; subtasks: Subtask[]; isExpanded: boolean;
-  onToggleExpanded: () => void; onToggleSubtask: (id: string) => void; onAddSubtask: (title: string) => void;
+  onToggleExpanded: () => void; onToggleSubtask: (id: string) => void; onAddSubtask: (title: string) => void; onEdit?: () => void;
 }) {
   const completed = subtasks.filter((s) => s.isCompleted).length;
   const hasSubtasks = subtasks.length > 0;
@@ -225,7 +234,7 @@ function DesktopTaskRow({
 
   return (
     <div className="border-t border-slate-100">
-      <div className="grid grid-cols-[24px_minmax(0,1fr)_140px_160px_140px_120px] items-center gap-4 px-5 py-2.5 text-sm transition hover:bg-slate-50">
+      <div className="grid grid-cols-[24px_minmax(0,1fr)_140px_160px_140px_120px_48px] items-center gap-4 px-5 py-2.5 text-sm transition hover:bg-slate-50">
         <button type="button" onClick={onToggleExpanded} className="flex h-5 w-5 items-center justify-center rounded hover:bg-slate-200">
           {isExpanded ? <ChevronDown className="h-3.5 w-3.5 text-slate-500" /> : <ChevronRight className="h-3.5 w-3.5 text-slate-400" />}
         </button>
@@ -260,6 +269,13 @@ function DesktopTaskRow({
         <div className="flex items-center gap-1.5">
           <span className={`h-2 w-2 rounded-full ${PRIORITY_DOT[task.priority]}`} />
           <span className="text-slate-600">{PRIORITY_LABEL[task.priority]}</span>
+        </div>
+        <div>
+          {onEdit && (
+            <button type="button" onClick={onEdit} className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-200 hover:text-primary">
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
       </div>
 

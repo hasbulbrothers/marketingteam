@@ -1,4 +1,4 @@
-import { BarChart3, CalendarRange, FolderKanban, House, Images, Users } from "lucide-react";
+import { BarChart3, CalendarRange, FolderKanban, House, Images, Settings, Users } from "lucide-react";
 
 export const navigationItems = [
   { href: "/", label: "Dashboard", icon: House },
@@ -7,4 +7,5 @@ export const navigationItems = [
   { href: "/team", label: "Team", icon: Users },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/assets", label: "Assets", icon: Images },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];

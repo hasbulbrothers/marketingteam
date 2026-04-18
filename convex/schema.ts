@@ -6,6 +6,7 @@ import {
   kpiMetricValidator,
   kpiPeriodValidator,
   kpiScopeValidator,
+  notificationTypeValidator,
   platformValidator,
   priorityValidator,
   roleValidator,
@@ -140,6 +141,20 @@ export default defineSchema({
     .index("by_task", ["taskId"])
     .index("by_task_created_at", ["taskId", "createdAt"])
     .index("by_user", ["userId"]),
+
+  notifications: defineTable({
+    recipientId: v.id("users"),
+    senderId: v.optional(v.id("users")),
+    type: notificationTypeValidator,
+    title: v.string(),
+    message: v.string(),
+    taskId: v.optional(v.id("tasks")),
+    isRead: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_recipient", ["recipientId"])
+    .index("by_recipient_read", ["recipientId", "isRead"])
+    .index("by_recipient_created", ["recipientId", "createdAt"]),
 
   assets: defineTable({
     taskId: v.id("tasks"),
