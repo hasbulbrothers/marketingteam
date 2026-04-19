@@ -9,6 +9,8 @@ import type { Id } from "@/convex/_generated/dataModel";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const notifApi = (api as any).notifications;
+const hasConvex = Boolean(process.env.NEXT_PUBLIC_CONVEX_URL);
+const hasClerk = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 type Notification = {
   _id: Id<"notifications">;
@@ -39,6 +41,10 @@ function timeAgo(ts: number) {
 }
 
 export function NotificationBell() {
+  if (!hasConvex || !hasClerk) {
+    return null;
+  }
+
   const { isLoaded, userId } = useAuth();
   const isAuthed = Boolean(isLoaded && userId);
   const unreadCount = useQuery(notifApi.queries.getUnreadCount, isAuthed ? {} : "skip");
