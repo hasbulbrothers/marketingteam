@@ -16,12 +16,16 @@ export async function requireAuthenticated(ctx: ConvexCtx) {
   return identity;
 }
 
-export async function requireCurrentUser(ctx: ConvexCtx) {
+export async function findCurrentUser(ctx: ConvexCtx) {
   const identity = await requireAuthenticated(ctx);
-  const user = await ctx.db
+  return ctx.db
     .query("users")
     .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
     .unique();
+}
+
+export async function requireCurrentUser(ctx: ConvexCtx) {
+  const user = await findCurrentUser(ctx);
 
   if (!user || !user.isActive) {
     throw new Error("Active application user not found.");
