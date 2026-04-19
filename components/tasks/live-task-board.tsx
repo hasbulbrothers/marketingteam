@@ -24,6 +24,7 @@ export function LiveTaskBoard() {
   ) as Array<{ id: string; taskId: string; author: string; role: string; message: string; createdAt: string }> | undefined;
 
   const createTask = useMutation(api.tasks.mutations.createTask);
+  const moveTaskStatus = useMutation(api.tasks.mutations.moveTaskStatus);
   const addComment = useMutation(api.comments.mutations.addComment);
 
   const assignees = useMemo(
@@ -64,6 +65,9 @@ export function LiveTaskBoard() {
           campaignId: task.campaign?.id ?? undefined,
         } as never);
         return;
+      }}
+      onStatusChange={async (taskId, status) => {
+        await moveTaskStatus({ taskId, status } as never);
       }}
       onAddComment={async (taskId, message) => {
         await addComment({ taskId, message } as never);

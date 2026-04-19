@@ -1,6 +1,7 @@
 import type { GenericDataModel, GenericMutationCtx } from "convex/server";
 import { mutationGeneric as mutation } from "convex/server";
 import { v } from "convex/values";
+import { logActivity, diffFields } from "../lib/activityLogger";
 import { requireCurrentUser } from "../lib/auth";
 import { isIsoDate } from "../lib/dates";
 import { notify } from "../lib/notifications";
@@ -45,6 +46,14 @@ export const createTask = mutation({
       updatedAt: Date.now(),
     });
 
+    await logActivity(ctx, {
+      userId: currentUser._id,
+      action: "task.created",
+      entityType: "task",
+      entityId: String(taskId),
+      entityName: args.title,
+    });
+
     if (args.assigneeId) {
       await notify(ctx, {
         recipientId: args.assigneeId as unknown,
@@ -63,26 +72,48 @@ export const createTask = mutation({
 export const updateTask = mutation({
   args: { taskId: v.id("tasks"), ...taskFields },
   handler: async (ctx, args) => {
-    await requireTaskAccess(ctx, args.taskId);
+    const currentUser = await requireTaskAccess(ctx, args.taskId);
     validateTaskPayload(args.title, args.description, args.tags, args.dueDate, args.scheduledAt);
-    await ensureTaskExists(ctx, args.taskId);
+    const existing = await ensureTaskExists(ctx, args.taskId);
     await ensureAssigneeExists(ctx, args.assigneeId);
     await ensureCampaignExists(ctx, args.campaignId);
 
     const { taskId, ...updateFields } = args;
+    const changes = diffFields(existing as Record<string, unknown>, updateFields, [
+      "title", "description", "platform", "contentType", "priority", "assigneeId", "campaignId", "dueDate", "scheduledAt",
+    ]);
     await ctx.db.patch(taskId, { ...updateFields, updatedAt: Date.now() });
+
+    if (changes.length > 0) {
+      await logActivity(ctx, {
+        userId: currentUser._id,
+        action: "task.updated",
+        entityType: "task",
+        entityId: String(taskId),
+        entityName: existing.title as string,
+        changes,
+      });
+    }
   },
 });
 
 export const deleteTask = mutation({
   args: { taskId: v.id("tasks") },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
-    await ensureTaskExists(ctx, args.taskId);
+    const admin = await requireAdmin(ctx);
+    const task = await ensureTaskExists(ctx, args.taskId);
     await ctx.db.patch(args.taskId, {
       isArchived: true,
       status: "archived",
       updatedAt: Date.now(),
+    });
+
+    await logActivity(ctx, {
+      userId: admin._id,
+      action: "task.deleted",
+      entityType: "task",
+      entityId: String(args.taskId),
+      entityName: task.title as string,
     });
   },
 });
@@ -92,10 +123,20 @@ export const moveTaskStatus = mutation({
   handler: async (ctx, args) => {
     const currentUser = await requireTaskAccess(ctx, args.taskId);
     const task = await ensureTaskExists(ctx, args.taskId);
+    const oldStatus = task.status as string;
     await ctx.db.patch(args.taskId, {
       status: args.status,
       publishedAt: args.status === "published" ? new Date().toISOString() : undefined,
       updatedAt: Date.now(),
+    });
+
+    await logActivity(ctx, {
+      userId: currentUser._id,
+      action: "task.status_changed",
+      entityType: "task",
+      entityId: String(args.taskId),
+      entityName: task.title as string,
+      changes: [{ field: "status", before: oldStatus, after: args.status }],
     });
 
     if (task.assigneeId) {
@@ -127,7 +168,17 @@ export const assignTask = mutation({
     const currentUser = await requireAdmin(ctx);
     const task = await ensureTaskExists(ctx, args.taskId);
     await ensureAssigneeExists(ctx, args.assigneeId);
+    const oldAssigneeId = task.assigneeId ? String(task.assigneeId) : null;
     await ctx.db.patch(args.taskId, { assigneeId: args.assigneeId, updatedAt: Date.now() });
+
+    await logActivity(ctx, {
+      userId: currentUser._id,
+      action: "task.assigned",
+      entityType: "task",
+      entityId: String(args.taskId),
+      entityName: task.title as string,
+      changes: [{ field: "assigneeId", before: oldAssigneeId, after: String(args.assigneeId) }],
+    });
 
     await notify(ctx, {
       recipientId: args.assigneeId as unknown,

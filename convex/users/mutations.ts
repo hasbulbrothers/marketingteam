@@ -1,5 +1,6 @@
 import { mutationGeneric as mutation, internalMutationGeneric as internalMutation } from "convex/server";
 import { v } from "convex/values";
+import { logActivity } from "../lib/activityLogger";
 import { requireAuthenticated } from "../lib/auth";
 import { notify } from "../lib/notifications";
 import { requireAdmin } from "../lib/permissions";
@@ -57,7 +58,18 @@ export const updateUserRole = mutation({
   args: { userId: v.id("users"), role: roleValidator },
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx);
+    const target = await ctx.db.get(args.userId);
+    const oldRole = target?.role as string;
     await ctx.db.patch(args.userId, { role: args.role, updatedAt: Date.now() });
+
+    await logActivity(ctx, {
+      userId: admin._id,
+      action: "user.role_changed",
+      entityType: "user",
+      entityId: String(args.userId),
+      entityName: (target?.name as string) ?? "Unknown",
+      changes: [{ field: "role", before: oldRole, after: args.role }],
+    });
 
     await notify(ctx, {
       recipientId: args.userId as unknown,
@@ -72,8 +84,17 @@ export const updateUserRole = mutation({
 export const deactivateUser = mutation({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const admin = await requireAdmin(ctx);
+    const target = await ctx.db.get(args.userId);
     await ctx.db.patch(args.userId, { isActive: false, updatedAt: Date.now() });
+
+    await logActivity(ctx, {
+      userId: admin._id,
+      action: "user.deactivated",
+      entityType: "user",
+      entityId: String(args.userId),
+      entityName: (target?.name as string) ?? "Unknown",
+    });
   },
 });
 

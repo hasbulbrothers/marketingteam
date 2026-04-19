@@ -1,5 +1,6 @@
 import { mutationGeneric as mutation } from "convex/server";
 import { v } from "convex/values";
+import { logActivity } from "../lib/activityLogger";
 import { isIsoDate } from "../lib/dates";
 import { requireCurrentUser } from "../lib/auth";
 import { requireAdmin } from "../lib/permissions";
@@ -38,7 +39,7 @@ export const createCampaign = mutation({
     }
 
     const now = Date.now();
-    return ctx.db.insert("campaigns", {
+    const campaignId = await ctx.db.insert("campaigns", {
       name,
       objective,
       description: args.description?.trim() || undefined,
@@ -53,6 +54,16 @@ export const createCampaign = mutation({
       createdAt: now,
       updatedAt: now,
     });
+
+    await logActivity(ctx, {
+      userId: currentUser._id,
+      action: "campaign.created",
+      entityType: "campaign",
+      entityId: String(campaignId),
+      entityName: name,
+    });
+
+    return campaignId;
   },
 });
 

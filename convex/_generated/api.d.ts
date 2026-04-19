@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as admin_queries from "../admin/queries.js";
 import type * as assets_mutations from "../assets/mutations.js";
 import type * as assets_queries from "../assets/queries.js";
 import type * as campaigns_mutations from "../campaigns/mutations.js";
@@ -18,6 +19,7 @@ import type * as dashboard_queries from "../dashboard/queries.js";
 import type * as http from "../http.js";
 import type * as kpi_mutations from "../kpi/mutations.js";
 import type * as kpi_queries from "../kpi/queries.js";
+import type * as lib_activityLogger from "../lib/activityLogger.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_dates from "../lib/dates.js";
 import type * as lib_notifications from "../lib/notifications.js";
@@ -39,6 +41,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "admin/queries": typeof admin_queries;
   "assets/mutations": typeof assets_mutations;
   "assets/queries": typeof assets_queries;
   "campaigns/mutations": typeof campaigns_mutations;
@@ -49,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "kpi/mutations": typeof kpi_mutations;
   "kpi/queries": typeof kpi_queries;
+  "lib/activityLogger": typeof lib_activityLogger;
   "lib/auth": typeof lib_auth;
   "lib/dates": typeof lib_dates;
   "lib/notifications": typeof lib_notifications;

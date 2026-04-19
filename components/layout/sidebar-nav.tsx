@@ -2,12 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
 import { Sparkles } from "lucide-react";
+import { api } from "@/convex/_generated/api";
 import { navigationItems } from "@/lib/constants/navigation";
 import { cn } from "@/lib/utils";
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const { isLoaded, userId } = useAuth();
+  const isAuthed = Boolean(isLoaded && userId);
+  const currentUser = useQuery(api.users.queries.getCurrentUser, isAuthed ? {} : "skip") as { role?: string } | null | undefined;
+  const isAdmin = currentUser?.role === "admin";
+
+  const visibleItems = navigationItems.filter((item) => !item.adminOnly || isAdmin);
 
   return (
     <aside className="fixed top-0 left-0 hidden h-screen w-72 overflow-y-auto border-r border-sidebar-border bg-sidebar px-8 py-8 lg:block">
@@ -22,7 +31,7 @@ export function SidebarNav() {
           </div>
         </div>
         <nav className="flex-1 space-y-2">
-          {navigationItems.map((item) => {
+          {visibleItems.map((item) => {
             const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             return (
               <Link

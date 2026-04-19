@@ -9,7 +9,7 @@ import { useTaskBoard } from "@/hooks/use-task-board";
 import { useTaskFilters } from "@/hooks/use-task-filters";
 import { CampaignSummary } from "@/types/campaign";
 import { TaskComment } from "@/types/comment";
-import { MarketingTask } from "@/types/task";
+import { MarketingTask, TaskStatus } from "@/types/task";
 import { TeamMember } from "@/types/user";
 
 type TaskBoardProps = {
@@ -21,6 +21,7 @@ type TaskBoardProps = {
   onSelectedTaskChange?: (taskId: string | null) => void;
   onCreateTask?: (task: MarketingTask) => Promise<void> | void;
   onAddComment?: (taskId: string, message: string) => Promise<void> | void;
+  onStatusChange?: (taskId: string, status: TaskStatus) => Promise<void> | void;
 };
 
 export function TaskBoard({
@@ -32,6 +33,7 @@ export function TaskBoard({
   onSelectedTaskChange,
   onCreateTask,
   onAddComment,
+  onStatusChange,
 }: TaskBoardProps) {
   const [tasks, setTasks] = useState(initialTasks);
   const [localSelectedTaskId, setLocalSelectedTaskId] = useState<string | null>(null);
@@ -97,6 +99,7 @@ export function TaskBoard({
         comments={selectedTask ? commentsByTask[selectedTask.id] ?? [] : []}
         onAddComment={handleAddComment}
         onOpenChange={(open) => !open && openTask(null)}
+        onStatusChange={onStatusChange}
       />
       <TaskCreateDialog
         open={isCreateOpen}

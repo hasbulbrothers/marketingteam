@@ -167,4 +167,17 @@ export default defineSchema({
   })
     .index("by_task", ["taskId"])
     .index("by_uploaded_by", ["uploadedBy"]),
+
+  activityLogs: defineTable({
+    userId: v.id("users"),
+    action: v.string(),
+    entityType: v.string(),
+    entityId: v.string(),
+    entityName: v.string(),
+    changes: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_created_at", ["createdAt"])
+    .index("by_entity", ["entityType", "entityId"])
+    .index("by_user", ["userId"]),
 });
