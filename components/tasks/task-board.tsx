@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
 import { TaskDetailSheet } from "@/components/tasks/task-detail-sheet";
 import { TaskTableNotion } from "@/components/tasks/task-table-notion";
@@ -36,6 +36,7 @@ export function TaskBoard({
   onStatusChange,
 }: TaskBoardProps) {
   const [tasks, setTasks] = useState(initialTasks);
+  useEffect(() => { setTasks(initialTasks); }, [initialTasks]);
   const [localSelectedTaskId, setLocalSelectedTaskId] = useState<string | null>(null);
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [localCommentsByTask, setLocalCommentsByTask] = useState<Record<string, TaskComment[]>>({});
