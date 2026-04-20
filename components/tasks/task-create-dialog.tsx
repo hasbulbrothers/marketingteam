@@ -81,7 +81,7 @@ export function TaskCreateDialog({
           <DialogTitle className="text-2xl font-bold tracking-tight text-slate-900">Create a marketing task</DialogTitle>
           <DialogDescription className="text-sm leading-7 text-slate-500">Capture the task once, then move it through planning, production, review, scheduling, and publishing.</DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 overflow-y-auto py-2 md:grid-cols-2">
+        <div className="grid min-h-0 flex-1 gap-4 overflow-y-auto py-2 md:grid-cols-2">
           <Input className="h-12 rounded-2xl border-none bg-background shadow-sm" placeholder="Task title" value={form.title} onChange={(event) => update("title", event.target.value)} />
           <Select value={form.assigneeId} onChange={(value) => update("assigneeId", value)} options={assignees.map((assignee) => ({ value: assignee.id, label: assignee.name }))} placeholder="Select assignee" />
           <Select value={form.campaignId} onChange={(value) => update("campaignId", value)} options={campaigns.map((campaign) => ({ value: campaign.id, label: campaign.name }))} placeholder="Optional campaign" />
@@ -95,9 +95,9 @@ export function TaskCreateDialog({
             <Textarea className="min-h-32 rounded-[24px] border-none bg-background shadow-sm" placeholder="Brief, deliverables, feedback notes, or publishing context" value={form.description} onChange={(event) => update("description", event.target.value)} />
           </div>
         </div>
-        <div className="flex flex-col-reverse gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
+        <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
           <Button variant="outline" className="rounded-2xl border-slate-200 bg-white text-slate-600" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button className="rounded-2xl bg-primary text-primary-foreground hover:bg-primary/95" onClick={handleSave}>Save draft</Button>
+          <Button className="rounded-2xl bg-primary text-primary-foreground hover:bg-primary/95" disabled={!form.title.trim() || !form.description.trim()} onClick={handleSave}>Save draft</Button>
         </div>
       </DialogContent>
     </Dialog>
