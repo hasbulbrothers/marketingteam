@@ -61,23 +61,14 @@ export function KpiCard({
       </div>
 
       <div className="mt-4 flex items-end justify-between">
-        {kpi.metric === "tasks_completed" ? (
-          <div>
-            <p className="text-xs text-slate-400">Subtask progress</p>
-            <p className="text-lg font-bold text-slate-900">{kpi.actual}%</p>
-          </div>
-        ) : (
-          <>
-            <div>
-              <p className="text-xs text-slate-400">Actual</p>
-              <p className="text-lg font-bold text-slate-900">{kpi.actual} <span className="text-xs text-slate-400">{unit}</span></p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs text-slate-400">Target</p>
-              <p className="text-sm font-semibold text-slate-700">{kpi.target} {unit}</p>
-            </div>
-          </>
-        )}
+        <div>
+          <p className="text-xs text-slate-400">Actual</p>
+          <p className="text-lg font-bold text-slate-900">{kpi.actual} <span className="text-xs text-slate-400">{unit}</span></p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-slate-400">Target</p>
+          <p className="text-sm font-semibold text-slate-700">{kpi.target} {unit}</p>
+        </div>
       </div>
 
       <div className="mt-3 space-y-1.5">

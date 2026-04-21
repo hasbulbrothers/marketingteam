@@ -1,5 +1,5 @@
 export const KPI_METRICS = [
-  { value: "tasks_completed", label: "Subtask completion", unit: "%" },
+  { value: "tasks_completed", label: "Subtasks completed", unit: "subtasks" },
   { value: "tasks_on_time", label: "On-time deliveries", unit: "tasks" },
   { value: "posts_published", label: "Posts published", unit: "posts" },
   {
