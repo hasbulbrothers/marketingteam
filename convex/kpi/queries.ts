@@ -71,13 +71,16 @@ function computeActual(
 
   switch (kpi.metric) {
     case "tasks_completed": {
-      return withinRange.filter((t) => {
+      let count = 0;
+      for (const t of withinRange) {
         const subs = t.subtasks ?? [];
         if (subs.length > 0) {
-          return subs.every((s) => s.isCompleted);
+          count += subs.filter((s) => s.isCompleted).length / subs.length;
+        } else if (PUBLISHED_STATUSES.includes(t.status)) {
+          count += 1;
         }
-        return PUBLISHED_STATUSES.includes(t.status);
-      }).length;
+      }
+      return Math.round(count * 10) / 10;
     }
     case "posts_published": {
       return withinRange.filter((t) => t.status === "published").length;
