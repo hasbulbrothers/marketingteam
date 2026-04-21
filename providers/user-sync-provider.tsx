@@ -31,7 +31,8 @@ export function UserSyncProvider({ children }: { children: React.ReactNode }) {
       department: "Marketing",
       jobTitle: "Team Member",
       avatarUrl,
-    }).catch(() => {
+    }).catch((err) => {
+      console.error("User sync failed:", err);
       syncedUserIdRef.current = null;
     });
   }, [avatarUrl, email, isLoaded, isSignedIn, name, upsertUser, userId]);

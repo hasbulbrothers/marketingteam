@@ -6,8 +6,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { CurrentUserProfile } from "@/types/user";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const adminApi = (api as any).admin;
+const adminApi = api.admin;
 
 type ActivityChange = { field: string; before: unknown; after: unknown };
 
