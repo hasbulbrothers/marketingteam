@@ -54,13 +54,13 @@ export function TaskCreateDialog({
   }
 
   function handleSave() {
-    if (!form.title.trim() || !form.description.trim()) return;
+    if (!form.title.trim()) return;
     const assignee = assignees.find((item) => item.id === form.assigneeId) ?? assignees[0];
     const fallbackAssignee = assignee ?? { id: "unassigned", name: "Unassigned", role: "Team" };
     onCreate({
       id: `task-${crypto.randomUUID()}`,
       title: form.title.trim(),
-      description: form.description.trim(),
+      description: form.description.trim() || "-",
       dueDate: form.dueDate || null,
       platform: form.platform,
       contentType: form.contentType,
@@ -97,7 +97,7 @@ export function TaskCreateDialog({
         </div>
         <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
           <Button variant="outline" className="rounded-2xl border-slate-200 bg-white text-slate-600" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button className="rounded-2xl bg-primary text-primary-foreground hover:bg-primary/95" disabled={!form.title.trim() || !form.description.trim()} onClick={handleSave}>Save draft</Button>
+          <Button className="rounded-2xl bg-primary text-primary-foreground hover:bg-primary/95" disabled={!form.title.trim()} onClick={handleSave}>Save draft</Button>
         </div>
       </DialogContent>
     </Dialog>

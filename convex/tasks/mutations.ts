@@ -242,8 +242,8 @@ function validateTaskPayload(
   if (title.trim().length < 3 || title.trim().length > 160) {
     throw new Error("Tajuk mestilah antara 3 hingga 160 aksara.");
   }
-  if (!description.trim() || description.trim().length > 5000) {
-    throw new Error("Penerangan mestilah antara 1 hingga 5000 aksara.");
+  if (description.trim().length > 5000) {
+    throw new Error("Penerangan mestilah tidak lebih 5000 aksara.");
   }
   if (tags.length > 10 || tags.some((tag) => !tag.trim() || tag.trim().length > 50)) {
     throw new Error("Maksimum 10 tag, setiap satu antara 1 hingga 50 aksara.");
