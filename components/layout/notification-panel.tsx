@@ -7,8 +7,7 @@ import { Bell, CheckCheck, MessageSquare, ShieldCheck, UserPlus } from "lucide-r
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const notifApi = (api as any).notifications;
+const notifApi = api.notifications;
 const hasConvex = Boolean(process.env.NEXT_PUBLIC_CONVEX_URL);
 const hasClerk = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
@@ -30,7 +29,7 @@ const ICONS: Record<string, typeof Bell> = {
 };
 
 function timeAgo(ts: number) {
-  const diff = Date.now() - ts;
+  const diff = Math.max(0, Date.now() - ts);
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "just now";
   if (mins < 60) return `${mins}m ago`;
@@ -41,14 +40,15 @@ function timeAgo(ts: number) {
 }
 
 export function NotificationBell() {
-  if (!hasConvex || !hasClerk) {
-    return null;
-  }
-
   const { isLoaded, userId } = useAuth();
   const isAuthed = Boolean(isLoaded && userId);
-  const unreadCount = useQuery(notifApi.queries.getUnreadCount, isAuthed ? {} : "skip");
+  const enabled = hasConvex && hasClerk;
+  const unreadCount = useQuery(notifApi.queries.getUnreadCount, enabled && isAuthed ? {} : "skip");
   const [open, setOpen] = useState(false);
+
+  if (!enabled) {
+    return null;
+  }
 
   return (
     <div className="relative">

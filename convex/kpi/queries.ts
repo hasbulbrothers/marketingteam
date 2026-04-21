@@ -111,8 +111,8 @@ function serializeKpi(
 ) {
   const lowerIsBetter = kpi.metric === "average_lead_time_days";
   const progress = lowerIsBetter
-    ? kpi.target > 0
-      ? Math.min(100, Math.round((kpi.target / Math.max(actual, 0.01)) * 100))
+    ? kpi.target > 0 && actual > 0
+      ? Math.min(100, Math.round((kpi.target / actual) * 100))
       : 0
     : kpi.target > 0
       ? Math.min(100, Math.round((actual / kpi.target) * 100))

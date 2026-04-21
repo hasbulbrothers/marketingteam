@@ -228,8 +228,8 @@ function validateTaskPayload(
   if (!description.trim() || description.trim().length > 5000) {
     throw new Error("Description must be between 1 and 5000 characters.");
   }
-  if (tags.length > 10 || tags.some((tag) => !tag.trim())) {
-    throw new Error("Use up to 10 non-empty tags.");
+  if (tags.length > 10 || tags.some((tag) => !tag.trim() || tag.trim().length > 50)) {
+    throw new Error("Use up to 10 tags, each between 1 and 50 characters.");
   }
   if (dueDate && !isIsoDate(dueDate)) {
     throw new Error("Due date must be a valid ISO date string.");
