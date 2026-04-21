@@ -56,6 +56,8 @@ function LiveCalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
   ) as TaskComment[] | undefined;
   const addComment = useMutation(api.comments.mutations.addComment);
   const createTask = useMutation(api.tasks.mutations.createTask);
+  const moveTaskStatus = useMutation(api.tasks.mutations.moveTaskStatus);
+  const renameTaskMutation = useMutation(api.tasks.mutations.renameTask);
   const addSubtaskMutation = useMutation(api.tasks.mutations.addSubtask);
   const toggleSubtaskMutation = useMutation(api.tasks.mutations.toggleSubtask);
   const deleteSubtaskMutation = useMutation(api.tasks.mutations.deleteSubtask);
@@ -117,6 +119,16 @@ function LiveCalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
           });
         }}
         onOpenChange={(open) => !open && setSelectedTaskId(null)}
+        onStatusChange={(taskId, status) => {
+          void moveTaskStatus({ taskId, status } as never).catch((err) => {
+            toast.error(err instanceof Error ? err.message : "Failed to update status");
+          });
+        }}
+        onRenameTask={(taskId, title) => {
+          void renameTaskMutation({ taskId, title } as never).catch((err) => {
+            toast.error(err instanceof Error ? err.message : "Failed to rename task");
+          });
+        }}
         onAddSubtask={(taskId, title) => {
           void addSubtaskMutation({ taskId, title } as never).catch((err) => {
             toast.error(err instanceof Error ? err.message : "Failed to add subtask");
