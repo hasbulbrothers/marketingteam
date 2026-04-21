@@ -34,7 +34,6 @@ type TaskDoc = {
 };
 
 const MS_PER_DAY = 86_400_000;
-const PUBLISHED_STATUSES = ["published", "scheduled"];
 
 function parseDateStart(value: string) {
   return new Date(`${value}T00:00:00.000Z`).getTime();
