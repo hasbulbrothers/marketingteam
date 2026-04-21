@@ -3,11 +3,21 @@
 import { useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
-import { Target, TrendingUp, Trophy, Users } from "lucide-react";
+import { CheckSquare, Target, TrendingUp, Trophy, Users } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { metricLabel, metricUnit } from "./kpi-labels";
+
+type SubtaskUserProgress = {
+  userId: string;
+  userName: string;
+  teamId: string | null;
+  totalSubtasks: number;
+  completedSubtasks: number;
+  progress: number;
+  taskCount: number;
+};
 
 type KpiView = {
   id: string;
@@ -36,6 +46,11 @@ export function KpiOverview() {
     api.kpi.queries.listKpiTargets,
     isAuthed ? {} : "skip",
   ) as KpiView[] | undefined;
+
+  const subtaskProgress = useQuery(
+    api.kpi.queries.getSubtaskProgress,
+    isAuthed ? {} : "skip",
+  ) as SubtaskUserProgress[] | undefined;
 
   const summary = useMemo(() => {
     const list = kpis ?? [];
@@ -187,6 +202,22 @@ export function KpiOverview() {
                           )
                           .join(" · ")}
                       </p>
+                      {(() => {
+                        const teamMembers = (subtaskProgress ?? []).filter((u) => u.teamId === team.teamId);
+                        const total = teamMembers.reduce((s, m) => s + m.totalSubtasks, 0);
+                        const done = teamMembers.reduce((s, m) => s + m.completedSubtasks, 0);
+                        if (total === 0) return null;
+                        const pct = Math.round((done / total) * 100);
+                        return (
+                          <div className="mt-2 space-y-1">
+                            <div className="flex items-center justify-between text-xs text-slate-500">
+                              <span className="flex items-center gap-1"><CheckSquare className="h-3 w-3" /> Subtasks</span>
+                              <span>{done}/{total} ({pct}%)</span>
+                            </div>
+                            <Progress className="h-1.5 bg-emerald-50" value={Math.min(100, pct)} />
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -238,6 +269,53 @@ export function KpiOverview() {
                   </div>
                 </div>
               ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {subtaskProgress && subtaskProgress.length > 0 && (
+        <Card className="premium-card border-none p-8">
+          <CardHeader className="p-0">
+            <CardTitle className="flex items-center gap-2 text-xl font-bold text-slate-900">
+              <CheckSquare className="h-5 w-5 text-emerald-500" />
+              Subtask progress
+            </CardTitle>
+            <p className="text-sm text-slate-400">
+              Individual subtask completion ratio across all assigned tasks.
+            </p>
+          </CardHeader>
+          <CardContent className="mt-6 space-y-2 p-0">
+            {subtaskProgress.map((u) => (
+              <div
+                key={u.userId}
+                className="rounded-[20px] bg-background px-5 py-4"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-slate-800">
+                      {u.userName}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {u.taskCount} task{u.taskCount === 1 ? "" : "s"} · {u.totalSubtasks} subtask{u.totalSubtasks === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                  <div className="w-32 text-right">
+                    <p className="text-sm font-semibold text-slate-800">
+                      {u.completedSubtasks}/{u.totalSubtasks}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      {u.progress}% done
+                    </p>
+                  </div>
+                  <div className="hidden w-40 md:block">
+                    <Progress
+                      className="h-2 bg-slate-100"
+                      value={Math.min(100, u.progress)}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
       )}

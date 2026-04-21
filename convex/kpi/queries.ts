@@ -205,6 +205,49 @@ export const listKpiTargets = query({
   },
 });
 
+export const getSubtaskProgress = query({
+  args: { teamId: v.optional(v.id("teams")) },
+  handler: async (ctx, args) => {
+    await requireAuthenticated(ctx);
+
+    const [users, allTasks] = await Promise.all([
+      ctx.db.query("users").collect(),
+      ctx.db.query("tasks").collect(),
+    ]);
+
+    const activeUsers = users.filter((u) => u.isActive);
+    const filtered = args.teamId
+      ? activeUsers.filter((u) => String(u.teamId ?? "") === String(args.teamId))
+      : activeUsers;
+
+    const tasks = allTasks.filter((t) => !t.isArchived && t.status !== "archived");
+
+    type SubtaskItem = { id: string; title: string; isCompleted: boolean };
+
+    return filtered.map((user) => {
+      const userTasks = tasks.filter((t) => String(t.assigneeId ?? "") === String(user._id));
+      let total = 0;
+      let completed = 0;
+      for (const task of userTasks) {
+        const subtasks = (task.subtasks as SubtaskItem[] | undefined) ?? [];
+        total += subtasks.length;
+        completed += subtasks.filter((s) => s.isCompleted).length;
+      }
+      const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+      return {
+        userId: String(user._id),
+        userName: user.name as string,
+        teamId: user.teamId ? String(user.teamId) : null,
+        totalSubtasks: total,
+        completedSubtasks: completed,
+        progress,
+        taskCount: userTasks.length,
+      };
+    }).filter((u) => u.totalSubtasks > 0)
+      .sort((a, b) => b.progress - a.progress);
+  },
+});
+
 export const getTeamKpiSummary = query({
   args: { teamId: v.id("teams") },
   handler: async (ctx, args) => {
@@ -245,6 +288,37 @@ export const getTeamKpiSummary = query({
           )
         : 0;
 
+    type SubtaskItem = { id: string; title: string; isCompleted: boolean };
+    const memberSubtaskProgress = members
+      .filter((m) => m.isActive)
+      .map((member) => {
+        const userTasks = (tasks as TaskDoc[]).filter(
+          (t) => !t.isArchived && String(t.assigneeId ?? "") === String(member._id),
+        );
+        let total = 0;
+        let completed = 0;
+        for (const task of userTasks) {
+          const subtasks = ((task as unknown as { subtasks?: SubtaskItem[] }).subtasks) ?? [];
+          total += subtasks.length;
+          completed += subtasks.filter((s) => s.isCompleted).length;
+        }
+        return {
+          userId: String(member._id),
+          userName: member.name as string,
+          totalSubtasks: total,
+          completedSubtasks: completed,
+          progress: total > 0 ? Math.round((completed / total) * 100) : 0,
+        };
+      })
+      .filter((m) => m.totalSubtasks > 0)
+      .sort((a, b) => b.progress - a.progress);
+
+    const teamTotalSubtasks = memberSubtaskProgress.reduce((s, m) => s + m.totalSubtasks, 0);
+    const teamCompletedSubtasks = memberSubtaskProgress.reduce((s, m) => s + m.completedSubtasks, 0);
+    const teamSubtaskProgress = teamTotalSubtasks > 0
+      ? Math.round((teamCompletedSubtasks / teamTotalSubtasks) * 100)
+      : 0;
+
     return {
       teamId: String(team._id),
       teamName: team.name,
@@ -252,6 +326,12 @@ export const getTeamKpiSummary = query({
       achievedTargets,
       averageProgress,
       kpis,
+      subtaskProgress: {
+        total: teamTotalSubtasks,
+        completed: teamCompletedSubtasks,
+        progress: teamSubtaskProgress,
+        members: memberSubtaskProgress,
+      },
     };
   },
 });
