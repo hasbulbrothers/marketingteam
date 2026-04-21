@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Columns3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PLATFORMS } from "@/lib/constants/platforms";
 import { TASK_STATUSES } from "@/lib/constants/task-status";
@@ -25,43 +25,64 @@ export function CalendarToolbar({
   onFilterChange: <K extends keyof Filters>(key: K, value: Filters[K]) => void;
 }) {
   return (
-    <div className="premium-card border-none p-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-3">
-            <IconButton onClick={() => onMonthChange("prev")}><ChevronLeft className="h-4 w-4" /></IconButton>
-          <div>
-            <p className="text-lg font-bold tracking-tight text-slate-900">{periodLabel}</p>
-            <p className="text-sm text-slate-400">{filters.view === "week" ? "Week view for campaign deadlines and publishing dates." : "Month view for campaign deadlines and publishing dates."}</p>
-          </div>
-          <IconButton onClick={() => onMonthChange("next")}><ChevronRight className="h-4 w-4" /></IconButton>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-slate-200" onClick={() => onMonthChange("prev")}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <h2 className="min-w-[160px] text-center text-lg font-bold tracking-tight text-slate-900 sm:min-w-[200px]">
+            {periodLabel}
+          </h2>
+          <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-slate-200" onClick={() => onMonthChange("next")}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
-        <div className="grid gap-3 md:grid-cols-4">
-          <Select value={filters.platform} onChange={(value) => onFilterChange("platform", value as Filters["platform"])}>
-            <option value="all">All platforms</option>
-            {PLATFORMS.map((platform) => <option key={platform} value={platform}>{platform}</option>)}
-          </Select>
-          <Select value={filters.assigneeId} onChange={(value) => onFilterChange("assigneeId", value)}>
-            <option value="all">All assignees</option>
-            {assignees.map((assignee) => <option key={assignee.id} value={assignee.id}>{assignee.name}</option>)}
-          </Select>
-          <Select value={filters.status} onChange={(value) => onFilterChange("status", value as Filters["status"])}>
-            <option value="all">All status</option>
-            {TASK_STATUSES.map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}
-          </Select>
-          <Select value={filters.view} onChange={(value) => onFilterChange("view", value as Filters["view"])}>
-            <option value="month">Month view</option>
-            <option value="week">Week view</option>
-          </Select>
+        <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1">
+          <button
+            type="button"
+            onClick={() => onFilterChange("view", "month")}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${filters.view === "month" ? "bg-primary text-white" : "text-slate-500 hover:bg-slate-50"}`}
+          >
+            <CalendarDays className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Month</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onFilterChange("view", "week")}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${filters.view === "week" ? "bg-primary text-white" : "text-slate-500 hover:bg-slate-50"}`}
+          >
+            <Columns3 className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Week</span>
+          </button>
         </div>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <FilterSelect value={filters.platform} onChange={(value) => onFilterChange("platform", value as Filters["platform"])}>
+          <option value="all">All platforms</option>
+          {PLATFORMS.map((platform) => <option key={platform} value={platform}>{platform}</option>)}
+        </FilterSelect>
+        <FilterSelect value={filters.assigneeId} onChange={(value) => onFilterChange("assigneeId", value)}>
+          <option value="all">All assignees</option>
+          {assignees.map((assignee) => <option key={assignee.id} value={assignee.id}>{assignee.name}</option>)}
+        </FilterSelect>
+        <FilterSelect value={filters.status} onChange={(value) => onFilterChange("status", value as Filters["status"])}>
+          <option value="all">All statuses</option>
+          {TASK_STATUSES.map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}
+        </FilterSelect>
       </div>
     </div>
   );
 }
 
-function IconButton({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
-  return <Button variant="outline" size="icon" className="h-11 w-11 rounded-2xl border-slate-200 bg-white" onClick={onClick}>{children}</Button>;
-}
-
-function Select({ children, value, onChange }: { children: React.ReactNode; value: string; onChange: (value: string) => void }) {
-  return <select className="rounded-2xl bg-background px-4 py-3 text-sm text-slate-500 shadow-sm outline-none" value={value} onChange={(event) => onChange(event.target.value)}>{children}</select>;
+function FilterSelect({ children, value, onChange }: { children: React.ReactNode; value: string; onChange: (value: string) => void }) {
+  return (
+    <select
+      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 shadow-sm outline-none transition hover:border-slate-300 focus:border-primary focus:ring-1 focus:ring-primary/20"
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+    >
+      {children}
+    </select>
+  );
 }
