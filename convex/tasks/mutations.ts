@@ -122,6 +122,9 @@ export const moveTaskStatus = mutation({
   args: { taskId: v.id("tasks"), status: taskStatusValidator },
   handler: async (ctx, args) => {
     const currentUser = await requireTaskAccess(ctx, args.taskId);
+    if (args.status === "archived" && currentUser.role !== "admin") {
+      throw new Error("Only admins can archive tasks.");
+    }
     const task = await ensureTaskExists(ctx, args.taskId);
     const oldStatus = task.status as string;
     await ctx.db.patch(args.taskId, {

@@ -113,7 +113,7 @@ export const searchTasks = query({
   handler: async (ctx, args) => {
     await requireAuthenticated(ctx);
     const term = args.query.trim().toLowerCase();
-    if (!term) return [];
+    if (term.length < 2) return [];
     return serializeTasks(
       ctx,
       filterTasks(await ctx.db.query("tasks").collect(), args).filter(
@@ -121,7 +121,7 @@ export const searchTasks = query({
           task.title.toLowerCase().includes(term) ||
           task.description.toLowerCase().includes(term) ||
           task.tags.some((tag: string) => tag.toLowerCase().includes(term)),
-      ),
+      ).slice(0, 100),
     );
   },
 });

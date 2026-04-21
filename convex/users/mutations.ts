@@ -6,10 +6,10 @@ import { notify } from "../lib/notifications";
 import { requireAdmin } from "../lib/permissions";
 import { roleValidator } from "../lib/validators";
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "azribrahim.work@gmail.com";
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? "").toLowerCase().split(",").map((e) => e.trim()).filter(Boolean);
 
 function resolveRole(email: string, currentRole?: string) {
-  if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) return "admin" as const;
+  if (ADMIN_EMAILS.includes(email.toLowerCase())) return "admin" as const;
   if (currentRole === "admin") return "admin" as const;
   return "team" as const;
 }

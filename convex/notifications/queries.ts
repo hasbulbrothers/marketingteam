@@ -10,7 +10,7 @@ export const getMyNotifications = query({
     }
     const notifications = await ctx.db
       .query("notifications")
-      .withIndex("by_recipient", (q: any) => q.eq("recipientId", user._id))
+      .withIndex("by_recipient", (q) => q.eq("recipientId", user!._id))
       .order("desc")
       .take(50);
 
@@ -35,7 +35,7 @@ export const getUnreadCount = query({
     }
     const all = await ctx.db
       .query("notifications")
-      .withIndex("by_recipient", (q: any) => q.eq("recipientId", user._id))
+      .withIndex("by_recipient", (q) => q.eq("recipientId", user!._id))
       .collect();
     return all.filter((n) => !n.isRead).length;
   },

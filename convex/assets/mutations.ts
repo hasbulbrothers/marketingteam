@@ -2,6 +2,22 @@ import { mutationGeneric as mutation } from "convex/server";
 import { v } from "convex/values";
 import { requireCurrentUser } from "../lib/auth";
 
+const ALLOWED_MIME_PREFIXES = ["image/", "application/pdf", "video/", "audio/", "text/"];
+const MAX_FILENAME_LENGTH = 255;
+
+function isValidAssetUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+function sanitizeFileName(name: string): string {
+  return name.replace(/[/\\]/g, "_").slice(0, MAX_FILENAME_LENGTH);
+}
+
 export const createAsset = mutation({
   args: {
     taskId: v.id("tasks"),
@@ -22,8 +38,17 @@ export const createAsset = mutation({
       throw new Error("Asset metadata is incomplete.");
     }
 
+    if (!isValidAssetUrl(args.fileUrl)) {
+      throw new Error("Invalid asset URL.");
+    }
+
+    if (!ALLOWED_MIME_PREFIXES.some((p) => args.fileType.startsWith(p))) {
+      throw new Error("Unsupported file type.");
+    }
+
     return ctx.db.insert("assets", {
       ...args,
+      fileName: sanitizeFileName(args.fileName),
       uploadedBy: currentUser._id,
       createdAt: Date.now(),
     });

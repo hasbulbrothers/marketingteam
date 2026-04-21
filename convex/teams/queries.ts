@@ -34,7 +34,7 @@ export const listTeams = query({
           isActive: team.isActive,
           memberCount: members.length,
           leader: leader
-            ? { id: String(leader._id), name: leader.name, email: leader.email }
+            ? { id: String(leader._id), name: leader.name }
             : null,
         };
       })
@@ -68,7 +68,6 @@ export const getTeam = query({
         ? {
             id: String(leader._id),
             name: leader.name,
-            email: leader.email,
             jobTitle: leader.jobTitle,
           }
         : null,
@@ -77,7 +76,6 @@ export const getTeam = query({
         .map((m) => ({
           id: String(m._id),
           name: m.name,
-          email: m.email,
           role: m.role,
           jobTitle: m.jobTitle,
           avatarUrl: m.avatarUrl,

@@ -24,7 +24,7 @@ export const createCampaign = mutation({
     const name = args.name.trim();
     const objective = args.objective.trim();
     if (name.length < 3) throw new Error("Campaign name must be at least 3 characters.");
-    if (!objective) throw new Error("Campaign objective is required.");
+    if (!objective || objective.length > 500) throw new Error("Campaign objective must be between 1 and 500 characters.");
     if (!isIsoDate(args.startDate) || !isIsoDate(args.endDate)) {
       throw new Error("Campaign dates must be valid ISO date strings.");
     }
