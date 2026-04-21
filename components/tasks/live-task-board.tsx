@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
+import { toast } from "sonner";
 import { TaskBoard } from "@/components/tasks/task-board";
 import { api } from "@/convex/_generated/api";
 import { CampaignSummary } from "@/types/campaign";
@@ -51,27 +52,39 @@ export function LiveTaskBoard() {
       selectedTaskId={selectedTaskId}
       onSelectedTaskChange={setSelectedTaskId}
       onCreateTask={async (task) => {
-        await createTask({
-          title: task.title,
-          description: task.description,
-          status: task.status,
-          priority: task.priority,
-          platform: task.platform,
-          contentType: task.contentType,
-          tags: task.tags,
-          dueDate: task.dueDate,
-          scheduledAt: task.status === "scheduled" ? task.dueDate : undefined,
-          assigneeId: task.assignee.id === "unassigned" ? undefined : task.assignee.id,
-          campaignId: task.campaign?.id ?? undefined,
-        } as never);
-        return;
+        try {
+          await createTask({
+            title: task.title,
+            description: task.description,
+            status: task.status,
+            priority: task.priority,
+            platform: task.platform,
+            contentType: task.contentType,
+            tags: task.tags,
+            dueDate: task.dueDate,
+            scheduledAt: task.status === "scheduled" ? task.dueDate : undefined,
+            assigneeId: task.assignee.id === "unassigned" ? undefined : task.assignee.id,
+            campaignId: task.campaign?.id ?? undefined,
+          } as never);
+          toast.success("Task created");
+        } catch (err) {
+          toast.error(err instanceof Error ? err.message : "Failed to create task");
+        }
       }}
       onStatusChange={async (taskId, status) => {
-        await moveTaskStatus({ taskId, status } as never);
+        try {
+          await moveTaskStatus({ taskId, status } as never);
+          toast.success("Status updated");
+        } catch (err) {
+          toast.error(err instanceof Error ? err.message : "Failed to update status");
+        }
       }}
       onAddComment={async (taskId, message) => {
-        await addComment({ taskId, message } as never);
-        return;
+        try {
+          await addComment({ taskId, message } as never);
+        } catch (err) {
+          toast.error(err instanceof Error ? err.message : "Failed to add comment");
+        }
       }}
     />
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -75,6 +76,9 @@ export function CampaignMetricDialog({
       });
       setForm(initialState);
       onOpenChange(false);
+      toast.success("Metrics saved");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save metrics");
     } finally {
       setSubmitting(false);
     }

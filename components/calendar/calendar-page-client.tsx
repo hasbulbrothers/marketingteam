@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
+import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
 import { CalendarDayPopup } from "@/components/calendar/calendar-day-popup";
 import { CalendarGrid } from "@/components/calendar/calendar-grid";
@@ -102,7 +103,9 @@ function LiveCalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
         comments={comments ?? []}
         onAddComment={(message) => {
           if (!selectedTaskId) return;
-          void addComment({ taskId: selectedTaskId, message } as never);
+          void addComment({ taskId: selectedTaskId, message } as never).catch((err) => {
+            toast.error(err instanceof Error ? err.message : "Failed to add comment");
+          });
         }}
         onOpenChange={(open) => !open && setSelectedTaskId(null)}
       />
@@ -115,19 +118,24 @@ function LiveCalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
         campaigns={campaigns ?? []}
         presetDueDate={createDate}
         onCreate={async (task) => {
-          await createTask({
+          try {
+            await createTask({
               title: task.title,
               description: task.description,
               status: task.status,
               priority: task.priority,
               platform: task.platform,
               contentType: task.contentType,
-            tags: task.tags,
-            dueDate: task.dueDate ?? undefined,
-            scheduledAt: task.status === "scheduled" ? task.dueDate ?? undefined : undefined,
-            assigneeId: task.assignee.id,
-            campaignId: task.campaign?.id ?? undefined,
-          } as never);
+              tags: task.tags,
+              dueDate: task.dueDate ?? undefined,
+              scheduledAt: task.status === "scheduled" ? task.dueDate ?? undefined : undefined,
+              assigneeId: task.assignee.id === "unassigned" ? undefined : task.assignee.id,
+              campaignId: task.campaign?.id ?? undefined,
+            } as never);
+            toast.success("Task created");
+          } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Failed to create task");
+          }
         }}
       />
       ) : null}
