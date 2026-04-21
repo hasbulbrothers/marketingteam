@@ -50,7 +50,8 @@ export const getTaskById = query({
     await requireAuthenticated(ctx);
     const task = await ctx.db.get(args.taskId);
     if (!task) return null;
-    return serializeTask(ctx, task);
+    const [serialized] = await serializeTasks(ctx, [task as unknown as RawTask]);
+    return serialized;
   },
 });
 
@@ -141,33 +142,46 @@ function filterTasks(tasks: RawTask[], args: Record<string, unknown>) {
 }
 
 async function serializeTasks(ctx: QueryCtx, tasks: RawTask[]) {
-  return Promise.all(tasks.map((task) => serializeTask(ctx, task)));
-}
+  const assigneeIds = [...new Set(tasks.map((t) => t.assigneeId).filter(Boolean))];
+  const campaignIds = [...new Set(tasks.map((t) => t.campaignId).filter(Boolean))];
 
-async function serializeTask(ctx: QueryCtx, task: RawTask) {
-  const assignee = task.assigneeId ? await ctx.db.get(task.assigneeId as never) : null;
-  const campaign = task.campaignId ? await ctx.db.get(task.campaignId as never) : null;
-  return {
-    id: String(task._id),
-    title: task.title,
-    description: task.description,
-    status: task.status,
-    priority: task.priority,
-    dueDate: task.dueDate ?? null,
-    platform: task.platform,
-    contentType: task.contentType,
-    tags: task.tags,
-    assignee: {
-      id: assignee ? String(assignee._id) : "unassigned",
-      name: assignee?.name ?? "Unassigned",
-      role: assignee?.jobTitle ?? assignee?.role ?? "Team Member",
-    },
-    campaign: campaign
-      ? {
-          id: String(campaign._id),
-          name: campaign.name,
-          status: campaign.status,
-        }
-      : null,
-  };
+  const [assignees, campaigns] = await Promise.all([
+    Promise.all(assigneeIds.map((id) => ctx.db.get(id as never))),
+    Promise.all(campaignIds.map((id) => ctx.db.get(id as never))),
+  ]);
+
+  const assigneeMap = new Map(
+    assignees.filter(Boolean).map((u) => [String(u!._id), u]),
+  );
+  const campaignMap = new Map(
+    campaigns.filter(Boolean).map((c) => [String(c!._id), c]),
+  );
+
+  return tasks.map((task) => {
+    const assignee = task.assigneeId ? assigneeMap.get(String(task.assigneeId)) : null;
+    const campaign = task.campaignId ? campaignMap.get(String(task.campaignId)) : null;
+    return {
+      id: String(task._id),
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      dueDate: task.dueDate ?? null,
+      platform: task.platform,
+      contentType: task.contentType,
+      tags: task.tags,
+      assignee: {
+        id: assignee ? String(assignee._id) : "unassigned",
+        name: assignee?.name ?? "Unassigned",
+        role: assignee?.jobTitle ?? assignee?.role ?? "Team Member",
+      },
+      campaign: campaign
+        ? {
+            id: String(campaign._id),
+            name: campaign.name,
+            status: campaign.status,
+          }
+        : null,
+    };
+  });
 }

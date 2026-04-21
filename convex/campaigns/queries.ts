@@ -318,7 +318,7 @@ export const getCampaignDetail = query({
 
     const contributionMap = new Map<string, { person: string; role: string; tasks: number; completed: number }>();
     for (const task of tasks) {
-      const assignee = task.assigneeId ? allUsers.find((user) => user._id === task.assigneeId) : null;
+      const assignee = task.assigneeId ? userMap.get(String(task.assigneeId)) : null;
       const key = assignee?.name ?? "Unassigned";
       const current = contributionMap.get(key) ?? {
         person: key,

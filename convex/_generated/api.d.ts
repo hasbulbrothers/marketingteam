@@ -24,6 +24,7 @@ import type * as lib_auth from "../lib/auth.js";
 import type * as lib_dates from "../lib/dates.js";
 import type * as lib_notifications from "../lib/notifications.js";
 import type * as lib_permissions from "../lib/permissions.js";
+import type * as lib_rateLimit from "../lib/rateLimit.js";
 import type * as lib_validators from "../lib/validators.js";
 import type * as notifications_mutations from "../notifications/mutations.js";
 import type * as notifications_queries from "../notifications/queries.js";
@@ -57,6 +58,7 @@ declare const fullApi: ApiFromModules<{
   "lib/dates": typeof lib_dates;
   "lib/notifications": typeof lib_notifications;
   "lib/permissions": typeof lib_permissions;
+  "lib/rateLimit": typeof lib_rateLimit;
   "lib/validators": typeof lib_validators;
   "notifications/mutations": typeof notifications_mutations;
   "notifications/queries": typeof notifications_queries;

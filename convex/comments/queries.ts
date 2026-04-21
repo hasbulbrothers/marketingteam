@@ -11,18 +11,22 @@ export const getCommentsByTask = query({
       .withIndex("by_task_created_at", (q) => q.eq("taskId", args.taskId))
       .collect();
 
-    return Promise.all(
-      comments.map(async (comment) => {
-        const user = await ctx.db.get(comment.userId);
-        return {
-          id: String(comment._id),
-          taskId: String(comment.taskId),
-          author: user?.name ?? "Unknown user",
-          role: user?.jobTitle ?? user?.role ?? "Team Member",
-          message: comment.message,
-          createdAt: new Date(comment.createdAt).toISOString(),
-        };
-      }),
+    const uniqueUserIds = [...new Set(comments.map((c) => c.userId))];
+    const users = await Promise.all(uniqueUserIds.map((id) => ctx.db.get(id)));
+    const userMap = new Map(
+      users.filter(Boolean).map((u) => [String(u!._id), u]),
     );
+
+    return comments.map((comment) => {
+      const user = userMap.get(String(comment.userId));
+      return {
+        id: String(comment._id),
+        taskId: String(comment.taskId),
+        author: user?.name ?? "Unknown user",
+        role: user?.jobTitle ?? user?.role ?? "Team Member",
+        message: comment.message,
+        createdAt: new Date(comment.createdAt).toISOString(),
+      };
+    });
   },
 });

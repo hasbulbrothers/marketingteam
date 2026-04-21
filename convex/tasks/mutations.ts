@@ -77,6 +77,16 @@ export const updateTask = mutation({
     const currentUser = await requireTaskAccess(ctx, args.taskId);
     validateTaskPayload(args.title, args.description, args.tags, args.dueDate, args.scheduledAt);
     const existing = await ensureTaskExists(ctx, args.taskId);
+
+    if (currentUser.role !== "admin") {
+      if (args.assigneeId !== existing.assigneeId) {
+        throw new Error("Only admins can reassign tasks.");
+      }
+      if (args.campaignId !== existing.campaignId) {
+        throw new Error("Only admins can change the campaign.");
+      }
+    }
+
     await ensureAssigneeExists(ctx, args.assigneeId);
     await ensureCampaignExists(ctx, args.campaignId);
 

@@ -14,15 +14,21 @@ export const getMyNotifications = query({
       .order("desc")
       .take(50);
 
-    const withSenders = [];
-    for (const n of notifications) {
-      const sender = n.senderId ? await ctx.db.get(n.senderId as never) : null;
-      withSenders.push({
+    const senderIds = [...new Set(
+      notifications.map((n) => n.senderId).filter(Boolean),
+    )];
+    const senders = await Promise.all(senderIds.map((id) => ctx.db.get(id as never)));
+    const senderMap = new Map(
+      senders.filter(Boolean).map((s) => [String(s!._id), s]),
+    );
+
+    return notifications.map((n) => {
+      const sender = n.senderId ? senderMap.get(String(n.senderId)) : null;
+      return {
         ...n,
         senderName: sender ? (sender as { name: string }).name : "System",
-      });
-    }
-    return withSenders;
+      };
+    });
   },
 });
 

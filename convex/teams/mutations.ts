@@ -114,6 +114,7 @@ export const deleteTeam = mutation({
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx);
     const team = await ctx.db.get(args.teamId);
+    if (!team) throw new Error("Team not found.");
 
     const members = await ctx.db
       .query("users")
@@ -137,7 +138,7 @@ export const deleteTeam = mutation({
       action: "team.deleted",
       entityType: "team",
       entityId: String(args.teamId),
-      entityName: (team?.name as string) ?? "Unknown",
+      entityName: team.name as string,
     });
   },
 });

@@ -63,7 +63,8 @@ export const updateUserRole = mutation({
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx);
     const target = await ctx.db.get(args.userId);
-    const oldRole = target?.role as string;
+    if (!target) throw new Error("User not found.");
+    const oldRole = target.role as string;
     await ctx.db.patch(args.userId, { role: args.role, updatedAt: Date.now() });
 
     await logActivity(ctx, {
@@ -71,7 +72,7 @@ export const updateUserRole = mutation({
       action: "user.role_changed",
       entityType: "user",
       entityId: String(args.userId),
-      entityName: (target?.name as string) ?? "Unknown",
+      entityName: target.name as string,
       changes: [{ field: "role", before: oldRole, after: args.role }],
     });
 
@@ -90,6 +91,7 @@ export const deactivateUser = mutation({
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx);
     const target = await ctx.db.get(args.userId);
+    if (!target) throw new Error("User not found.");
     await ctx.db.patch(args.userId, { isActive: false, updatedAt: Date.now() });
 
     await logActivity(ctx, {
@@ -97,7 +99,7 @@ export const deactivateUser = mutation({
       action: "user.deactivated",
       entityType: "user",
       entityId: String(args.userId),
-      entityName: (target?.name as string) ?? "Unknown",
+      entityName: target.name as string,
     });
   },
 });
@@ -128,7 +130,14 @@ export const upsertUserFromWebhook = internalMutation({
     };
 
     if (existing) {
-      await ctx.db.patch(existing._id, { ...payload, role: resolveRole(email, existing.role) });
+      await ctx.db.patch(existing._id, {
+        clerkId: args.clerkId,
+        email,
+        avatarUrl: args.avatarUrl,
+        isActive: true,
+        updatedAt: Date.now(),
+        role: resolveRole(email, existing.role),
+      });
       return existing._id;
     }
 

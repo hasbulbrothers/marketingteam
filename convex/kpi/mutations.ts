@@ -1,7 +1,7 @@
 import { mutationGeneric as mutation } from "convex/server";
 import { v } from "convex/values";
-import { requireCurrentUser } from "../lib/auth";
 import { requireAdmin } from "../lib/permissions";
+import { isIsoDate } from "../lib/dates";
 import {
   kpiMetricValidator,
   kpiPeriodValidator,
@@ -10,10 +10,10 @@ import {
 } from "../lib/validators";
 
 function validateDateRange(startDate: string, endDate: string) {
-  if (!startDate || !endDate) {
-    throw new Error("Start and end dates are required.");
+  if (!isIsoDate(startDate) || !isIsoDate(endDate)) {
+    throw new Error("Dates must be valid ISO date strings.");
   }
-  if (new Date(endDate).getTime() < new Date(startDate).getTime()) {
+  if (endDate < startDate) {
     throw new Error("End date must be on or after start date.");
   }
 }
@@ -108,6 +108,8 @@ export const deleteKpiTarget = mutation({
   args: { kpiId: v.id("kpiTargets") },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
+    const kpi = await ctx.db.get(args.kpiId);
+    if (!kpi) throw new Error("KPI target not found.");
     await ctx.db.delete(args.kpiId);
   },
 });
