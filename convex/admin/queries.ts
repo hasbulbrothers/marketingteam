@@ -12,7 +12,7 @@ export const getActivityLogs = query({
 
     const limit = Math.min(args.limit ?? 50, 100);
 
-    let logsQuery = ctx.db
+    const logsQuery = ctx.db
       .query("activityLogs")
       .withIndex("by_created_at")
       .order("desc");

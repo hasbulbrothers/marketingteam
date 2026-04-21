@@ -71,7 +71,7 @@ function computeActual(
   switch (kpi.metric) {
     case "tasks_completed": {
       let completed = 0;
-      for (const t of scoped) {
+      for (const t of withinRange) {
         const subs = t.subtasks ?? [];
         completed += subs.filter((s) => s.isCompleted).length;
       }

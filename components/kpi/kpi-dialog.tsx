@@ -76,6 +76,18 @@ export function KpiDialog({
         });
       }
       setOpen(false);
+      if (mode === "create") {
+        setScope("team");
+        setTeamId("");
+        setUserId("");
+        setMetric("tasks_completed");
+        setTarget("10");
+        setPeriod("monthly");
+        setStartDate(new Date().toISOString().slice(0, 10));
+        setEndDate(new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10));
+        setPlatform("");
+        setLabel("");
+      }
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to save KPI");
     } finally {
