@@ -168,6 +168,11 @@ export default defineSchema({
     .index("by_task", ["taskId"])
     .index("by_uploaded_by", ["uploadedBy"]),
 
+  rateLimits: defineTable({
+    key: v.string(),
+    timestamps: v.array(v.number()),
+  }).index("by_key", ["key"]),
+
   activityLogs: defineTable({
     userId: v.id("users"),
     action: v.string(),

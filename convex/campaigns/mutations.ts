@@ -4,6 +4,7 @@ import { logActivity } from "../lib/activityLogger";
 import { isIsoDate } from "../lib/dates";
 import { requireCurrentUser } from "../lib/auth";
 import { requireAdmin } from "../lib/permissions";
+import { enforceRateLimit } from "../lib/rateLimit";
 import { campaignStatusValidator, platformValidator } from "../lib/validators";
 
 export const createCampaign = mutation({
@@ -20,6 +21,7 @@ export const createCampaign = mutation({
   },
   handler: async (ctx, args) => {
     const currentUser = await requireAdmin(ctx);
+    await enforceRateLimit(ctx, String(currentUser._id), "createCampaign", 10, 60_000);
 
     const name = args.name.trim();
     const objective = args.objective.trim();
@@ -84,6 +86,7 @@ export const createCampaignMetric = mutation({
   },
   handler: async (ctx, args) => {
     const currentUser = await requireCurrentUser(ctx);
+    await enforceRateLimit(ctx, String(currentUser._id), "createMetric", 30, 60_000);
 
     const campaign = await ctx.db.get(args.campaignId);
     if (!campaign || !campaign.isActive) throw new Error("Campaign not found.");

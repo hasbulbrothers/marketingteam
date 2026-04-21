@@ -6,6 +6,7 @@ import { requireCurrentUser } from "../lib/auth";
 import { isIsoDate } from "../lib/dates";
 import { notify } from "../lib/notifications";
 import { requireAdmin, requireTaskAccess } from "../lib/permissions";
+import { enforceRateLimit } from "../lib/rateLimit";
 import {
   contentTypeValidator,
   platformValidator,
@@ -33,6 +34,7 @@ export const createTask = mutation({
   args: { ...taskFields, status: taskStatusValidator },
   handler: async (ctx, args) => {
     const currentUser = await requireCurrentUser(ctx);
+    await enforceRateLimit(ctx, String(currentUser._id), "createTask", 20, 60_000);
     validateTaskPayload(args.title, args.description, args.tags, args.dueDate, args.scheduledAt);
     await ensureAssigneeExists(ctx, args.assigneeId);
     await ensureCampaignExists(ctx, args.campaignId);

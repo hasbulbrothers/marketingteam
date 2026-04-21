@@ -1,6 +1,7 @@
 import { mutationGeneric as mutation } from "convex/server";
 import { v } from "convex/values";
 import { requireCurrentUser } from "../lib/auth";
+import { enforceRateLimit } from "../lib/rateLimit";
 
 const ALLOWED_MIME_PREFIXES = ["image/", "application/pdf", "video/", "audio/", "text/"];
 const MAX_FILENAME_LENGTH = 255;
@@ -28,6 +29,7 @@ export const createAsset = mutation({
   },
   handler: async (ctx, args) => {
     const currentUser = await requireCurrentUser(ctx);
+    await enforceRateLimit(ctx, String(currentUser._id), "createAsset", 15, 60_000);
     const task = await ctx.db.get(args.taskId);
 
     if (!task || task.isArchived) {
