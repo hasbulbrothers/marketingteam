@@ -75,12 +75,12 @@ function computeActual(
       for (const t of withinRange) {
         const subs = t.subtasks ?? [];
         if (subs.length > 0) {
-          count += subs.filter((s) => s.isCompleted).length / subs.length;
+          count += subs.filter((s) => s.isCompleted).length;
         } else if (PUBLISHED_STATUSES.includes(t.status)) {
           count += 1;
         }
       }
-      return Math.round(count * 10) / 10;
+      return count;
     }
     case "posts_published": {
       return withinRange.filter((t) => t.status === "published").length;
