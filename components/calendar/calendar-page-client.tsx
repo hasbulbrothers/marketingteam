@@ -83,7 +83,13 @@ function LiveCalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
         filters={filters}
         assignees={assignees.map((assignee) => ({ id: assignee.id, name: assignee.name }))}
         onMonthChange={(direction) => setMonth((current) => changePeriod(current, direction, filters.view))}
-        onFilterChange={(key, value) => setFilters((current) => ({ ...current, [key]: value }))}
+        onFilterChange={(key, value) => {
+          if (key === "view") {
+            const today = new Date();
+            setMonth(value === "week" ? today : new Date(today.getFullYear(), today.getMonth(), 1));
+          }
+          setFilters((current) => ({ ...current, [key]: value }));
+        }}
       />
       <CalendarGrid
         currentDate={month}
@@ -184,7 +190,13 @@ function CalendarPreview({ tasks }: { tasks: MarketingTask[] }) {
         filters={filters}
         assignees={assignees.map((assignee) => ({ id: assignee.id, name: assignee.name }))}
         onMonthChange={(direction) => setMonth((current) => changePeriod(current, direction, filters.view))}
-        onFilterChange={(key, value) => setFilters((current) => ({ ...current, [key]: value }))}
+        onFilterChange={(key, value) => {
+          if (key === "view") {
+            const today = new Date();
+            setMonth(value === "week" ? today : new Date(today.getFullYear(), today.getMonth(), 1));
+          }
+          setFilters((current) => ({ ...current, [key]: value }));
+        }}
       />
       <CalendarGrid
         currentDate={month}
