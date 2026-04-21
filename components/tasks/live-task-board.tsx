@@ -72,7 +72,7 @@ export function LiveTaskBoard() {
           } as never);
           toast.success("Task created");
         } catch (err) {
-          toast.error(err instanceof Error ? err.message : "Failed to create task");
+          toast.error(err instanceof Error ? err.message : "Gagal mencipta task.");
         }
       }}
       onStatusChange={async (taskId, status) => {
@@ -80,34 +80,34 @@ export function LiveTaskBoard() {
           await moveTaskStatus({ taskId, status } as never);
           toast.success("Status updated");
         } catch (err) {
-          toast.error(err instanceof Error ? err.message : "Failed to update status");
+          toast.error(err instanceof Error ? err.message : "Gagal mengemas kini status.");
         }
       }}
       onAddComment={async (taskId, message) => {
         try {
           await addComment({ taskId, message } as never);
         } catch (err) {
-          toast.error(err instanceof Error ? err.message : "Failed to add comment");
+          toast.error(err instanceof Error ? err.message : "Gagal menambah komen.");
         }
       }}
       onAddSubtask={(taskId, title) => {
         void addSubtaskMutation({ taskId, title } as never).catch((err) => {
-          toast.error(err instanceof Error ? err.message : "Failed to add subtask");
+          toast.error(err instanceof Error ? err.message : "Gagal menambah subtask.");
         });
       }}
       onToggleSubtask={(taskId, subtaskId) => {
         void toggleSubtaskMutation({ taskId, subtaskId } as never).catch((err) => {
-          toast.error(err instanceof Error ? err.message : "Failed to update subtask");
+          toast.error(err instanceof Error ? err.message : "Gagal mengemas kini subtask.");
         });
       }}
       onDeleteSubtask={(taskId, subtaskId) => {
         void deleteSubtaskMutation({ taskId, subtaskId } as never).catch((err) => {
-          toast.error(err instanceof Error ? err.message : "Failed to delete subtask");
+          toast.error(err instanceof Error ? err.message : "Gagal memadam subtask.");
         });
       }}
       onRenameTask={(taskId, title) => {
         void renameTaskMutation({ taskId, title } as never).catch((err) => {
-          toast.error(err instanceof Error ? err.message : "Failed to rename task");
+          toast.error(err instanceof Error ? err.message : "Gagal menamakan semula task.");
         });
       }}
     />

@@ -115,33 +115,33 @@ function LiveCalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
         onAddComment={(message) => {
           if (!selectedTaskId) return;
           void addComment({ taskId: selectedTaskId, message } as never).catch((err) => {
-            toast.error(err instanceof Error ? err.message : "Failed to add comment");
+            toast.error(err instanceof Error ? err.message : "Gagal menambah komen.");
           });
         }}
         onOpenChange={(open) => !open && setSelectedTaskId(null)}
         onStatusChange={(taskId, status) => {
           void moveTaskStatus({ taskId, status } as never).catch((err) => {
-            toast.error(err instanceof Error ? err.message : "Failed to update status");
+            toast.error(err instanceof Error ? err.message : "Gagal mengemas kini status.");
           });
         }}
         onRenameTask={(taskId, title) => {
           void renameTaskMutation({ taskId, title } as never).catch((err) => {
-            toast.error(err instanceof Error ? err.message : "Failed to rename task");
+            toast.error(err instanceof Error ? err.message : "Gagal menamakan semula task.");
           });
         }}
         onAddSubtask={(taskId, title) => {
           void addSubtaskMutation({ taskId, title } as never).catch((err) => {
-            toast.error(err instanceof Error ? err.message : "Failed to add subtask");
+            toast.error(err instanceof Error ? err.message : "Gagal menambah subtask.");
           });
         }}
         onToggleSubtask={(taskId, subtaskId) => {
           void toggleSubtaskMutation({ taskId, subtaskId } as never).catch((err) => {
-            toast.error(err instanceof Error ? err.message : "Failed to update subtask");
+            toast.error(err instanceof Error ? err.message : "Gagal mengemas kini subtask.");
           });
         }}
         onDeleteSubtask={(taskId, subtaskId) => {
           void deleteSubtaskMutation({ taskId, subtaskId } as never).catch((err) => {
-            toast.error(err instanceof Error ? err.message : "Failed to delete subtask");
+            toast.error(err instanceof Error ? err.message : "Gagal memadam subtask.");
           });
         }}
       />
@@ -170,7 +170,7 @@ function LiveCalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
             } as never);
             toast.success("Task created");
           } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Failed to create task");
+            toast.error(err instanceof Error ? err.message : "Gagal mencipta task.");
           }
         }}
       />

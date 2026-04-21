@@ -81,10 +81,10 @@ export const updateTask = mutation({
 
     if (currentUser.role !== "admin") {
       if (args.assigneeId !== existing.assigneeId) {
-        throw new Error("Only admins can reassign tasks.");
+        throw new Error("Hanya admin boleh tukar assignee task.");
       }
       if (args.campaignId !== existing.campaignId) {
-        throw new Error("Only admins can change the campaign.");
+        throw new Error("Hanya admin boleh tukar campaign.");
       }
     }
 
@@ -137,7 +137,7 @@ export const moveTaskStatus = mutation({
     const currentUser = await requireTaskAccess(ctx, args.taskId);
     await enforceRateLimit(ctx, String(currentUser._id), "moveTaskStatus", 30, 60_000);
     if (args.status === "archived" && currentUser.role !== "admin") {
-      throw new Error("Only admins can archive tasks.");
+      throw new Error("Hanya admin boleh archive task.");
     }
     const task = await ensureTaskExists(ctx, args.taskId);
     const oldStatus = task.status as string;
@@ -210,7 +210,7 @@ export const assignTask = mutation({
 
 async function ensureTaskExists(ctx: MutationCtx, taskId: RecordId) {
   const task = await ctx.db.get(taskId);
-  if (!task) throw new Error("Task not found.");
+  if (!task) throw new Error("Task tidak dijumpai.");
   return task;
 }
 
@@ -220,7 +220,7 @@ async function ensureAssigneeExists(
 ) {
   if (!assigneeId) return;
   const user = await ctx.db.get(assigneeId);
-  if (!user || !user.isActive) throw new Error("Assignee not found or inactive.");
+  if (!user || !user.isActive) throw new Error("User yang dipilih tidak dijumpai atau tidak aktif.");
 }
 
 async function ensureCampaignExists(
@@ -229,7 +229,7 @@ async function ensureCampaignExists(
 ) {
   if (!campaignId) return;
   const campaign = await ctx.db.get(campaignId);
-  if (!campaign || !campaign.isActive) throw new Error("Campaign not found or inactive.");
+  if (!campaign || !campaign.isActive) throw new Error("Campaign tidak dijumpai atau tidak aktif.");
 }
 
 function validateTaskPayload(
@@ -240,19 +240,19 @@ function validateTaskPayload(
   scheduledAt?: string,
 ) {
   if (title.trim().length < 3 || title.trim().length > 160) {
-    throw new Error("Title must be between 3 and 160 characters.");
+    throw new Error("Tajuk mestilah antara 3 hingga 160 aksara.");
   }
   if (!description.trim() || description.trim().length > 5000) {
-    throw new Error("Description must be between 1 and 5000 characters.");
+    throw new Error("Penerangan mestilah antara 1 hingga 5000 aksara.");
   }
   if (tags.length > 10 || tags.some((tag) => !tag.trim() || tag.trim().length > 50)) {
-    throw new Error("Use up to 10 tags, each between 1 and 50 characters.");
+    throw new Error("Maksimum 10 tag, setiap satu antara 1 hingga 50 aksara.");
   }
   if (dueDate && !isIsoDate(dueDate)) {
-    throw new Error("Due date must be a valid ISO date string.");
+    throw new Error("Tarikh akhir tidak sah. Sila pilih tarikh yang betul.");
   }
   if (scheduledAt && !isIsoDate(scheduledAt)) {
-    throw new Error("Scheduled date must be a valid ISO date string.");
+    throw new Error("Tarikh jadual tidak sah. Sila pilih tarikh yang betul.");
   }
 }
 
@@ -263,7 +263,7 @@ export const renameTask = mutation({
     await enforceRateLimit(ctx, String(currentUser._id), "renameTask", 20, 60_000);
     const title = args.title.trim();
     if (title.length < 3 || title.length > 160) {
-      throw new Error("Title must be between 3 and 160 characters.");
+      throw new Error("Tajuk mestilah antara 3 hingga 160 aksara.");
     }
     const task = await ensureTaskExists(ctx, args.taskId);
     const oldTitle = task.title as string;
@@ -289,10 +289,10 @@ export const addSubtask = mutation({
     await enforceRateLimit(ctx, String(currentUser._id), "addSubtask", 30, 60_000);
     const task = await ensureTaskExists(ctx, args.taskId);
     const title = args.title.trim();
-    if (!title || title.length > 200) throw new Error("Subtask title must be between 1 and 200 characters.");
+    if (!title || title.length > 200) throw new Error("Tajuk subtask mestilah antara 1 hingga 200 aksara.");
 
     const subtasks = (task.subtasks as { id: string; title: string; isCompleted: boolean }[] | undefined) ?? [];
-    if (subtasks.length >= 20) throw new Error("Maximum 20 subtasks per task.");
+    if (subtasks.length >= 20) throw new Error("Maksimum 20 subtask untuk setiap task.");
 
     const id = `${String(args.taskId)}-${Date.now()}`;
     await ctx.db.patch(args.taskId, {
@@ -311,7 +311,7 @@ export const toggleSubtask = mutation({
     const task = await ensureTaskExists(ctx, args.taskId);
     const subtasks = (task.subtasks as { id: string; title: string; isCompleted: boolean }[] | undefined) ?? [];
     const idx = subtasks.findIndex((s) => s.id === args.subtaskId);
-    if (idx === -1) throw new Error("Subtask not found.");
+    if (idx === -1) throw new Error("Subtask tidak dijumpai.");
 
     subtasks[idx] = { ...subtasks[idx], isCompleted: !subtasks[idx].isCompleted };
     await ctx.db.patch(args.taskId, { subtasks, updatedAt: Date.now() });

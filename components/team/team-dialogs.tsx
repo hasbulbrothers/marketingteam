@@ -36,7 +36,7 @@ export function CreateTeamDialog({ users }: { users: UserSummary[] }) {
       setName(""); setDescription(""); setColor(COLOR_PRESETS[0]); setLeaderId("");
       setOpen(false);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to create team");
+      toast.error(err instanceof Error ? err.message : "Gagal mencipta team.");
     } finally {
       setSubmitting(false);
     }
@@ -80,7 +80,7 @@ export function EditTeamDialog({ team, users }: { team: TeamSummary; users: User
       });
       setOpen(false);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update team");
+      toast.error(err instanceof Error ? err.message : "Gagal mengemas kini team.");
     } finally {
       setSubmitting(false);
     }
@@ -113,7 +113,7 @@ export function DeleteTeamButton({ teamId, teamName }: { teamId: string; teamNam
     try {
       await deleteTeam({ teamId: teamId as Id<"teams"> });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete team");
+      toast.error(err instanceof Error ? err.message : "Gagal memadam team.");
     } finally {
       setBusy(false);
     }
@@ -136,14 +136,14 @@ export function ManageMembersDialog({ teamId, teamName, members, availableUsers 
   const handleAdd = async (userId: Id<"users">) => {
     setPendingId(String(userId));
     try { await assignUser({ userId, teamId: teamId as Id<"teams"> }); }
-    catch (err) { toast.error(err instanceof Error ? err.message : "Failed to assign user"); }
+    catch (err) { toast.error(err instanceof Error ? err.message : "Gagal menambah ahli team."); }
     finally { setPendingId(null); }
   };
 
   const handleRemove = async (userId: Id<"users">) => {
     setPendingId(String(userId));
     try { await assignUser({ userId, teamId: null }); }
-    catch (err) { toast.error(err instanceof Error ? err.message : "Failed to remove user"); }
+    catch (err) { toast.error(err instanceof Error ? err.message : "Gagal mengeluarkan ahli team."); }
     finally { setPendingId(null); }
   };
 

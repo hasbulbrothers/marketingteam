@@ -25,7 +25,7 @@ export function KpiCard({
     if (!confirm("Delete this KPI target?")) return;
     setBusy(true);
     try { await deleteKpi({ kpiId: kpi.id as Id<"kpiTargets"> }); }
-    catch (err) { toast.error(err instanceof Error ? err.message : "Failed to delete KPI"); }
+    catch (err) { toast.error(err instanceof Error ? err.message : "Gagal memadam KPI."); }
     finally { setBusy(false); }
   };
 

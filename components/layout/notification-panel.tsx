@@ -95,7 +95,7 @@ function NotificationDropdown({ onClose }: { onClose: () => void }) {
             className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80"
             onClick={async () => {
               try { await markAllAsRead({}); }
-              catch (err) { toast.error(err instanceof Error ? err.message : "Failed to mark as read"); }
+              catch (err) { toast.error(err instanceof Error ? err.message : "Gagal menanda sebagai dibaca."); }
             }}
           >
             <CheckCheck className="h-3.5 w-3.5" />
@@ -123,7 +123,7 @@ function NotificationDropdown({ onClose }: { onClose: () => void }) {
                   try {
                     if (!n.isRead) await markAsRead({ notificationId: n._id as Id<"notifications"> });
                   } catch (err) {
-                    toast.error(err instanceof Error ? err.message : "Failed to mark as read");
+                    toast.error(err instanceof Error ? err.message : "Gagal menanda sebagai dibaca.");
                   }
                   onClose();
                 }}

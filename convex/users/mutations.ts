@@ -63,7 +63,7 @@ export const updateUserRole = mutation({
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx);
     const target = await ctx.db.get(args.userId);
-    if (!target) throw new Error("User not found.");
+    if (!target) throw new Error("User tidak dijumpai.");
     const oldRole = target.role as string;
     await ctx.db.patch(args.userId, { role: args.role, updatedAt: Date.now() });
 
@@ -91,7 +91,7 @@ export const deactivateUser = mutation({
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx);
     const target = await ctx.db.get(args.userId);
-    if (!target) throw new Error("User not found.");
+    if (!target) throw new Error("User tidak dijumpai.");
     await ctx.db.patch(args.userId, { isActive: false, updatedAt: Date.now() });
 
     await logActivity(ctx, {

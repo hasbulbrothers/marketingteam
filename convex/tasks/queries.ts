@@ -100,7 +100,7 @@ export const getCalendarTasks = query({
   },
   handler: async (ctx, args) => {
     await requireAuthenticated(ctx);
-    if (!isIsoDate(args.startDate) || !isIsoDate(args.endDate)) throw new Error("Calendar range must use valid ISO date strings.");
+    if (!isIsoDate(args.startDate) || !isIsoDate(args.endDate)) throw new Error("Tarikh tidak sah. Sila pilih tarikh yang betul.");
     return serializeTasks(
       ctx,
       filterTasks(await ctx.db.query("tasks").collect(), { ...args, includeArchived: false }).filter(

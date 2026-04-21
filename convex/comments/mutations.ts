@@ -12,12 +12,12 @@ export const addComment = mutation({
     const task = await ctx.db.get(args.taskId);
 
     if (!task || task.isArchived) {
-      throw new Error("Task not found.");
+      throw new Error("Task tidak dijumpai.");
     }
 
     const message = args.message.trim();
     if (!message || message.length > 2000) {
-      throw new Error("Comment must be between 1 and 2000 characters.");
+      throw new Error("Komen mestilah antara 1 hingga 2000 aksara.");
     }
 
     const commentId = await ctx.db.insert("comments", {

@@ -11,10 +11,10 @@ import {
 
 function validateDateRange(startDate: string, endDate: string) {
   if (!isIsoDate(startDate) || !isIsoDate(endDate)) {
-    throw new Error("Dates must be valid ISO date strings.");
+    throw new Error("Tarikh tidak sah. Sila pilih tarikh yang betul.");
   }
   if (endDate < startDate) {
-    throw new Error("End date must be on or after start date.");
+    throw new Error("Tarikh tamat mestilah selepas tarikh mula.");
   }
 }
 
@@ -36,13 +36,13 @@ export const createKpiTarget = mutation({
     validateDateRange(args.startDate, args.endDate);
 
     if (args.scope === "team" && !args.teamId) {
-      throw new Error("teamId is required for team-scope KPI.");
+      throw new Error("Sila pilih team untuk KPI jenis team.");
     }
     if (args.scope === "user" && !args.userId) {
-      throw new Error("userId is required for user-scope KPI.");
+      throw new Error("Sila pilih user untuk KPI jenis individu.");
     }
     if (args.target <= 0) {
-      throw new Error("Target must be greater than zero.");
+      throw new Error("Target mestilah lebih daripada sifar.");
     }
 
     const now = Date.now();
@@ -78,12 +78,12 @@ export const updateKpiTarget = mutation({
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const kpi = await ctx.db.get(args.kpiId);
-    if (!kpi) throw new Error("KPI target not found.");
+    if (!kpi) throw new Error("KPI target tidak dijumpai.");
 
     const patch: Record<string, unknown> = { updatedAt: Date.now() };
 
     if (args.target !== undefined) {
-      if (args.target <= 0) throw new Error("Target must be greater than zero.");
+      if (args.target <= 0) throw new Error("Target mestilah lebih daripada sifar.");
       patch.target = args.target;
     }
 
@@ -109,7 +109,7 @@ export const deleteKpiTarget = mutation({
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     const kpi = await ctx.db.get(args.kpiId);
-    if (!kpi) throw new Error("KPI target not found.");
+    if (!kpi) throw new Error("KPI target tidak dijumpai.");
     await ctx.db.delete(args.kpiId);
   },
 });

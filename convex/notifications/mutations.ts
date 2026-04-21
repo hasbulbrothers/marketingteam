@@ -6,10 +6,10 @@ export const markAsRead = mutation({
   args: { notificationId: v.id("notifications") },
   handler: async (ctx, args) => {
     const user = await findCurrentUser(ctx);
-    if (!user || !user.isActive) throw new Error("Authentication required.");
+    if (!user || !user.isActive) throw new Error("Sila log masuk untuk teruskan.");
     const notification = await ctx.db.get(args.notificationId);
     if (!notification || String(notification.recipientId) !== String(user._id)) {
-      throw new Error("Notification not found.");
+      throw new Error("Notifikasi tidak dijumpai.");
     }
     await ctx.db.patch(args.notificationId, { isRead: true });
   },
@@ -19,7 +19,7 @@ export const markAllAsRead = mutation({
   args: {},
   handler: async (ctx) => {
     const user = await findCurrentUser(ctx);
-    if (!user || !user.isActive) throw new Error("Authentication required.");
+    if (!user || !user.isActive) throw new Error("Sila log masuk untuk teruskan.");
     const all = await ctx.db
       .query("notifications")
       .withIndex("by_recipient", (q) => q.eq("recipientId", user!._id))

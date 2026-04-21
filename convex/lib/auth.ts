@@ -10,7 +10,7 @@ export async function requireAuthenticated(ctx: ConvexCtx) {
   const identity = await ctx.auth.getUserIdentity();
 
   if (!identity) {
-    throw new Error("Authentication required.");
+    throw new Error("Sila log masuk untuk teruskan.");
   }
 
   return identity;
@@ -28,7 +28,7 @@ export async function requireCurrentUser(ctx: ConvexCtx) {
   const user = await findCurrentUser(ctx);
 
   if (!user || !user.isActive) {
-    throw new Error("Active application user not found.");
+    throw new Error("Akaun anda tidak aktif. Sila hubungi admin.");
   }
 
   return user;

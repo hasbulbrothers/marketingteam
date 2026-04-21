@@ -11,7 +11,7 @@ export async function requireAdmin(ctx: ConvexCtx) {
   const user = await requireCurrentUser(ctx);
 
   if (user.role !== "admin") {
-    throw new Error("Admin access required.");
+    throw new Error("Anda tiada kebenaran. Hanya admin boleh buat ini.");
   }
 
   return user;
@@ -30,7 +30,7 @@ export async function requireTaskAccess(
   const task = await ctx.db.get(taskId as never);
 
   if (!task || (task.assigneeId !== user._id && task.createdBy !== user._id)) {
-    throw new Error("Task access denied.");
+    throw new Error("Anda tiada akses kepada task ini.");
   }
 
   return user;

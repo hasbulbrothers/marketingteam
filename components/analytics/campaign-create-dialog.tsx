@@ -81,7 +81,7 @@ export function CampaignCreateDialog({
       onOpenChange(false);
       toast.success("Campaign created");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to create campaign");
+      toast.error(err instanceof Error ? err.message : "Gagal mencipta campaign.");
     } finally {
       setSubmitting(false);
     }

@@ -23,7 +23,7 @@ export async function enforceRateLimit(
   const recent = all?.timestamps.filter((t) => t > windowStart) ?? [];
 
   if (recent.length >= maxRequests) {
-    throw new Error("Too many requests. Please try again later.");
+    throw new Error("Terlalu banyak permintaan. Cuba sebentar lagi.");
   }
 
   recent.push(now);

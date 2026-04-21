@@ -25,22 +25,22 @@ export const createCampaign = mutation({
 
     const name = args.name.trim();
     const objective = args.objective.trim();
-    if (name.length < 3 || name.length > 200) throw new Error("Campaign name must be between 3 and 200 characters.");
-    if (!objective || objective.length > 500) throw new Error("Campaign objective must be between 1 and 500 characters.");
+    if (name.length < 3 || name.length > 200) throw new Error("Nama campaign mestilah antara 3 hingga 200 aksara.");
+    if (!objective || objective.length > 500) throw new Error("Objektif campaign mestilah antara 1 hingga 500 aksara.");
     if (!isIsoDate(args.startDate) || !isIsoDate(args.endDate)) {
-      throw new Error("Campaign dates must be valid ISO date strings.");
+      throw new Error("Tarikh campaign tidak sah. Sila pilih tarikh yang betul.");
     }
     if (args.endDate < args.startDate) {
-      throw new Error("End date must be on or after start date.");
+      throw new Error("Tarikh tamat mestilah selepas tarikh mula.");
     }
-    if (args.budget < 0) throw new Error("Budget must be zero or greater.");
+    if (args.budget < 0) throw new Error("Bajet mestilah sifar atau lebih.");
 
     const owner = await ctx.db.get(args.ownerId);
-    if (!owner || !owner.isActive) throw new Error("Campaign owner not found.");
+    if (!owner || !owner.isActive) throw new Error("Pemilik campaign tidak dijumpai.");
 
     if (args.teamId) {
       const team = await ctx.db.get(args.teamId);
-      if (!team || !team.isActive) throw new Error("Selected team not found or inactive.");
+      if (!team || !team.isActive) throw new Error("Team yang dipilih tidak dijumpai atau tidak aktif.");
     }
 
     const now = Date.now();
@@ -89,16 +89,16 @@ export const createCampaignMetric = mutation({
     await enforceRateLimit(ctx, String(currentUser._id), "createMetric", 30, 60_000);
 
     const campaign = await ctx.db.get(args.campaignId);
-    if (!campaign || !campaign.isActive) throw new Error("Campaign not found.");
+    if (!campaign || !campaign.isActive) throw new Error("Campaign tidak dijumpai.");
 
     const isAdmin = currentUser.role === "admin";
     const isOwner = String(campaign.ownerId) === String(currentUser._id);
     const isTeamMember = campaign.teamId && String(currentUser.teamId ?? "") === String(campaign.teamId);
     if (!isAdmin && !isOwner && !isTeamMember) {
-      throw new Error("You don't have access to add metrics to this campaign.");
+      throw new Error("Anda tiada akses untuk menambah metrik pada campaign ini.");
     }
 
-    if (!isIsoDate(args.date)) throw new Error("Metric date must be a valid ISO date string.");
+    if (!isIsoDate(args.date)) throw new Error("Tarikh metrik tidak sah. Sila pilih tarikh yang betul.");
 
     const numericFields = [
       args.spend,
@@ -110,7 +110,7 @@ export const createCampaignMetric = mutation({
     ];
 
     if (numericFields.some((value) => value < 0)) {
-      throw new Error("Metric values must be zero or greater.");
+      throw new Error("Nilai metrik mestilah sifar atau lebih.");
     }
 
     const now = Date.now();

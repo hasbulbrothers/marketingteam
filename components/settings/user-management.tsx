@@ -78,11 +78,11 @@ export function UserManagement() {
             isSelf={currentUser?.id === String(user._id)}
             onChangeRole={async (role) => {
               try { await updateRole({ userId: user._id, role }); toast.success("Role updated"); }
-              catch (err) { toast.error(err instanceof Error ? err.message : "Failed to update role"); }
+              catch (err) { toast.error(err instanceof Error ? err.message : "Gagal mengemas kini peranan."); }
             }}
             onDeactivate={async () => {
               try { await deactivateUser({ userId: user._id }); toast.success("User deactivated"); }
-              catch (err) { toast.error(err instanceof Error ? err.message : "Failed to deactivate user"); }
+              catch (err) { toast.error(err instanceof Error ? err.message : "Gagal menyahaktifkan user."); }
             }}
           />
         ))}
@@ -104,11 +104,11 @@ export function UserManagement() {
             isSelf={currentUser?.id === String(user._id)}
             onChangeRole={async (role) => {
               try { await updateRole({ userId: user._id, role }); toast.success("Role updated"); }
-              catch (err) { toast.error(err instanceof Error ? err.message : "Failed to update role"); }
+              catch (err) { toast.error(err instanceof Error ? err.message : "Gagal mengemas kini peranan."); }
             }}
             onDeactivate={async () => {
               try { await deactivateUser({ userId: user._id }); toast.success("User deactivated"); }
-              catch (err) { toast.error(err instanceof Error ? err.message : "Failed to deactivate user"); }
+              catch (err) { toast.error(err instanceof Error ? err.message : "Gagal menyahaktifkan user."); }
             }}
           />
         ))}

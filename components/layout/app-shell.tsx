@@ -80,7 +80,7 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
             } as never);
             toast.success("Task created");
           } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Failed to create task");
+            toast.error(err instanceof Error ? err.message : "Gagal mencipta task.");
           }
         }}
       />

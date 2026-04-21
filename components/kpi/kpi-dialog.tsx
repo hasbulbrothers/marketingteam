@@ -89,7 +89,7 @@ export function KpiDialog({
         setLabel("");
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to save KPI");
+      alert(err instanceof Error ? err.message : "Gagal menyimpan KPI.");
     } finally {
       setSubmitting(false);
     }

@@ -78,7 +78,7 @@ export function CampaignMetricDialog({
       onOpenChange(false);
       toast.success("Metrics saved");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to save metrics");
+      toast.error(err instanceof Error ? err.message : "Gagal menyimpan metrik.");
     } finally {
       setSubmitting(false);
     }

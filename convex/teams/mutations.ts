@@ -22,14 +22,14 @@ export const createTeam = mutation({
     const admin = await requireAdmin(ctx);
 
     const name = args.name.trim();
-    if (!name) throw new Error("Team name is required.");
+    if (!name) throw new Error("Nama team diperlukan.");
 
     const slug = toSlug(name);
     const existing = await ctx.db
       .query("teams")
       .withIndex("by_slug", (q) => q.eq("slug", slug))
       .unique();
-    if (existing) throw new Error(`Team with slug "${slug}" already exists.`);
+    if (existing) throw new Error("Nama team ini sudah digunakan. Sila pilih nama lain.");
 
     const now = Date.now();
     const teamId = await ctx.db.insert("teams", {
@@ -68,20 +68,20 @@ export const updateTeam = mutation({
     const admin = await requireAdmin(ctx);
 
     const team = await ctx.db.get(args.teamId);
-    if (!team) throw new Error("Team not found.");
+    if (!team) throw new Error("Team tidak dijumpai.");
 
     const patch: Record<string, unknown> = { updatedAt: Date.now() };
 
     if (args.name !== undefined) {
       const name = args.name.trim();
-      if (!name) throw new Error("Team name is required.");
+      if (!name) throw new Error("Nama team diperlukan.");
       const slug = toSlug(name);
       if (slug !== team.slug) {
         const clash = await ctx.db
           .query("teams")
           .withIndex("by_slug", (q) => q.eq("slug", slug))
           .unique();
-        if (clash) throw new Error(`Team with slug "${slug}" already exists.`);
+        if (clash) throw new Error("Nama team ini sudah digunakan. Sila pilih nama lain.");
         patch.slug = slug;
       }
       patch.name = name;
@@ -114,7 +114,7 @@ export const deleteTeam = mutation({
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx);
     const team = await ctx.db.get(args.teamId);
-    if (!team) throw new Error("Team not found.");
+    if (!team) throw new Error("Team tidak dijumpai.");
 
     const members = await ctx.db
       .query("users")
@@ -152,13 +152,13 @@ export const assignUserToTeam = mutation({
     const admin = await requireAdmin(ctx);
 
     const user = await ctx.db.get(args.userId);
-    if (!user) throw new Error("User not found.");
+    if (!user) throw new Error("User tidak dijumpai.");
 
     const oldTeamId = user.teamId ? String(user.teamId) : null;
 
     if (args.teamId) {
       const team = await ctx.db.get(args.teamId);
-      if (!team || !team.isActive) throw new Error("Team not found or inactive.");
+      if (!team || !team.isActive) throw new Error("Team tidak dijumpai atau tidak aktif.");
     }
 
     await ctx.db.patch(args.userId, {
