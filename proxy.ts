@@ -5,7 +5,7 @@ const isProtectedRoute = createRouteMatcher([
   "/tasks(.*)",
   "/calendar(.*)",
   "/team(.*)",
-  "/assets(.*)",
+
   "/reports(.*)",
   "/analytics(.*)",
   "/activity(.*)",

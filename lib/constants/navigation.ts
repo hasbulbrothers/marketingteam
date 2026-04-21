@@ -1,4 +1,4 @@
-import { BarChart3, CalendarRange, FolderKanban, House, Images, ScrollText, Settings, Users } from "lucide-react";
+import { BarChart3, CalendarRange, FolderKanban, House, ScrollText, Settings, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export type NavItem = {
@@ -14,7 +14,7 @@ export const navigationItems: NavItem[] = [
   { href: "/calendar", label: "Calendar", icon: CalendarRange },
   { href: "/team", label: "Team", icon: Users },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/assets", label: "Assets", icon: Images },
+
   { href: "/activity", label: "Activity Log", icon: ScrollText, adminOnly: true },
   { href: "/settings", label: "Settings", icon: Settings },
 ];

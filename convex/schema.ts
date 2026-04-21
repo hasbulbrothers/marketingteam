@@ -161,18 +161,6 @@ export default defineSchema({
     .index("by_recipient_read", ["recipientId", "isRead"])
     .index("by_recipient_created", ["recipientId", "createdAt"]),
 
-  assets: defineTable({
-    taskId: v.id("tasks"),
-    uploadedBy: v.id("users"),
-    fileName: v.string(),
-    fileUrl: v.string(),
-    fileType: v.string(),
-    fileSize: v.optional(v.number()),
-    createdAt: v.number(),
-  })
-    .index("by_task", ["taskId"])
-    .index("by_uploaded_by", ["uploadedBy"]),
-
   rateLimits: defineTable({
     key: v.string(),
     timestamps: v.array(v.number()),
