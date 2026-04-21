@@ -29,6 +29,7 @@ export function LiveTaskBoard() {
   const addComment = useMutation(api.comments.mutations.addComment);
   const addSubtaskMutation = useMutation(api.tasks.mutations.addSubtask);
   const toggleSubtaskMutation = useMutation(api.tasks.mutations.toggleSubtask);
+  const deleteSubtaskMutation = useMutation(api.tasks.mutations.deleteSubtask);
   const renameTaskMutation = useMutation(api.tasks.mutations.renameTask);
 
   const assignees = useMemo(
@@ -97,6 +98,11 @@ export function LiveTaskBoard() {
       onToggleSubtask={(taskId, subtaskId) => {
         void toggleSubtaskMutation({ taskId, subtaskId } as never).catch((err) => {
           toast.error(err instanceof Error ? err.message : "Failed to update subtask");
+        });
+      }}
+      onDeleteSubtask={(taskId, subtaskId) => {
+        void deleteSubtaskMutation({ taskId, subtaskId } as never).catch((err) => {
+          toast.error(err instanceof Error ? err.message : "Failed to delete subtask");
         });
       }}
       onRenameTask={(taskId, title) => {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Pencil } from "lucide-react";
+import { Check, Pencil, Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -17,6 +17,9 @@ export function TaskDetailSheet({
   onOpenChange,
   onStatusChange,
   onRenameTask,
+  onAddSubtask,
+  onToggleSubtask,
+  onDeleteSubtask,
 }: {
   task: MarketingTask | null;
   comments: TaskComment[];
@@ -24,6 +27,9 @@ export function TaskDetailSheet({
   onOpenChange: (open: boolean) => void;
   onStatusChange?: (taskId: string, status: TaskStatus) => void;
   onRenameTask?: (taskId: string, title: string) => void;
+  onAddSubtask?: (taskId: string, title: string) => void;
+  onToggleSubtask?: (taskId: string, subtaskId: string) => void;
+  onDeleteSubtask?: (taskId: string, subtaskId: string) => void;
 }) {
   return (
     <Sheet open={Boolean(task)} onOpenChange={onOpenChange}>
@@ -55,6 +61,13 @@ export function TaskDetailSheet({
               <Meta label="Tags" value={task.tags.join(", ")} />
             </div>
             <Separator className="bg-slate-200" />
+            <SubtaskSection
+              task={task}
+              onAdd={onAddSubtask}
+              onToggle={onToggleSubtask}
+              onDelete={onDeleteSubtask}
+            />
+            <Separator className="bg-slate-200" />
             <section className="space-y-4">
               <h3 className="text-sm font-semibold text-slate-900">Comments</h3>
               <TaskCommentForm onSubmit={onAddComment} />
@@ -64,6 +77,78 @@ export function TaskDetailSheet({
         ) : null}
       </SheetContent>
     </Sheet>
+  );
+}
+
+function SubtaskSection({
+  task,
+  onAdd,
+  onToggle,
+  onDelete,
+}: {
+  task: MarketingTask;
+  onAdd?: (taskId: string, title: string) => void;
+  onToggle?: (taskId: string, subtaskId: string) => void;
+  onDelete?: (taskId: string, subtaskId: string) => void;
+}) {
+  const [value, setValue] = useState("");
+  const subtasks = task.subtasks ?? [];
+  const completed = subtasks.filter((s) => s.isCompleted).length;
+
+  function submit() {
+    const title = value.trim();
+    if (!title) return;
+    onAdd?.(task.id, title);
+    setValue("");
+  }
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-slate-900">Subtasks</h3>
+        {subtasks.length > 0 && (
+          <span className="text-xs text-slate-400">{completed}/{subtasks.length} completed</span>
+        )}
+      </div>
+      {subtasks.length === 0 ? (
+        <p className="text-xs text-slate-400">No subtasks yet.</p>
+      ) : (
+        <ul className="space-y-1">
+          {subtasks.map((sub) => (
+            <li key={sub.id} className="flex items-center gap-2 rounded-xl px-3 py-2 transition hover:bg-slate-50">
+              <button
+                type="button"
+                onClick={() => onToggle?.(task.id, sub.id)}
+                className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border transition ${
+                  sub.isCompleted ? "border-emerald-500 bg-emerald-500 text-white" : "border-slate-300 bg-white hover:border-slate-400"
+                }`}
+              >
+                {sub.isCompleted && <Check className="h-3 w-3" strokeWidth={3} />}
+              </button>
+              <span className={`flex-1 text-sm ${sub.isCompleted ? "text-slate-400 line-through" : "text-slate-700"}`}>{sub.title}</span>
+              {onDelete && (
+                <button type="button" onClick={() => onDelete(task.id, sub.id)} className="text-slate-300 transition hover:text-red-500">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {onAdd && (
+        <div className="flex items-center gap-2 rounded-xl border border-dashed border-slate-200 px-3 py-2">
+          <Plus className="h-4 w-4 text-slate-400" />
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
+            placeholder="Add subtask"
+            className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
+          />
+        </div>
+      )}
+    </section>
   );
 }
 

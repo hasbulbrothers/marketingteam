@@ -24,6 +24,7 @@ type TaskBoardProps = {
   onStatusChange?: (taskId: string, status: TaskStatus) => Promise<void> | void;
   onAddSubtask?: (taskId: string, title: string) => void;
   onToggleSubtask?: (taskId: string, subtaskId: string) => void;
+  onDeleteSubtask?: (taskId: string, subtaskId: string) => void;
   onRenameTask?: (taskId: string, title: string) => void;
 };
 
@@ -39,6 +40,7 @@ export function TaskBoard({
   onStatusChange,
   onAddSubtask,
   onToggleSubtask,
+  onDeleteSubtask,
   onRenameTask,
 }: TaskBoardProps) {
   const tasks = initialTasks;
@@ -112,6 +114,9 @@ export function TaskBoard({
         onOpenChange={(open) => !open && openTask(null)}
         onStatusChange={onStatusChange}
         onRenameTask={onRenameTask}
+        onAddSubtask={onAddSubtask}
+        onToggleSubtask={onToggleSubtask}
+        onDeleteSubtask={onDeleteSubtask}
       />
       <TaskCreateDialog
         open={isCreateOpen}
