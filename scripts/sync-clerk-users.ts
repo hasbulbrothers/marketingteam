@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 config({ path: ".env.local" });
 import { createClerkClient } from "@clerk/backend";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 
 const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY! });
 
@@ -23,7 +23,7 @@ async function syncAllUsers() {
     const args = JSON.stringify({ clerkId: user.id, name, email, avatarUrl: user.imageUrl || undefined });
 
     try {
-      execSync(`npx convex run --no-push users/mutations:upsertUserFromWebhook '${args}'`, { stdio: "pipe" });
+      execFileSync("npx", ["convex", "run", "--no-push", "users/mutations:upsertUserFromWebhook", args], { stdio: "pipe" });
       console.log(`✓ Synced: ${name} (${email})`);
     } catch (err) {
       const msg = (err as { stderr?: Buffer }).stderr?.toString() || (err as Error).message;

@@ -25,7 +25,7 @@ export const createCampaign = mutation({
 
     const name = args.name.trim();
     const objective = args.objective.trim();
-    if (name.length < 3) throw new Error("Campaign name must be at least 3 characters.");
+    if (name.length < 3 || name.length > 200) throw new Error("Campaign name must be between 3 and 200 characters.");
     if (!objective || objective.length > 500) throw new Error("Campaign objective must be between 1 and 500 characters.");
     if (!isIsoDate(args.startDate) || !isIsoDate(args.endDate)) {
       throw new Error("Campaign dates must be valid ISO date strings.");
@@ -90,6 +90,14 @@ export const createCampaignMetric = mutation({
 
     const campaign = await ctx.db.get(args.campaignId);
     if (!campaign || !campaign.isActive) throw new Error("Campaign not found.");
+
+    const isAdmin = currentUser.role === "admin";
+    const isOwner = String(campaign.ownerId) === String(currentUser._id);
+    const isTeamMember = campaign.teamId && String(currentUser.teamId ?? "") === String(campaign.teamId);
+    if (!isAdmin && !isOwner && !isTeamMember) {
+      throw new Error("You don't have access to add metrics to this campaign.");
+    }
+
     if (!isIsoDate(args.date)) throw new Error("Metric date must be a valid ISO date string.");
 
     const numericFields = [

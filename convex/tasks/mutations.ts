@@ -75,6 +75,7 @@ export const updateTask = mutation({
   args: { taskId: v.id("tasks"), ...taskFields },
   handler: async (ctx, args) => {
     const currentUser = await requireTaskAccess(ctx, args.taskId);
+    await enforceRateLimit(ctx, String(currentUser._id), "updateTask", 30, 60_000);
     validateTaskPayload(args.title, args.description, args.tags, args.dueDate, args.scheduledAt);
     const existing = await ensureTaskExists(ctx, args.taskId);
 
@@ -134,6 +135,7 @@ export const moveTaskStatus = mutation({
   args: { taskId: v.id("tasks"), status: taskStatusValidator },
   handler: async (ctx, args) => {
     const currentUser = await requireTaskAccess(ctx, args.taskId);
+    await enforceRateLimit(ctx, String(currentUser._id), "moveTaskStatus", 30, 60_000);
     if (args.status === "archived" && currentUser.role !== "admin") {
       throw new Error("Only admins can archive tasks.");
     }
@@ -258,6 +260,7 @@ export const renameTask = mutation({
   args: { taskId: v.id("tasks"), title: v.string() },
   handler: async (ctx, args) => {
     const currentUser = await requireTaskAccess(ctx, args.taskId);
+    await enforceRateLimit(ctx, String(currentUser._id), "renameTask", 20, 60_000);
     const title = args.title.trim();
     if (title.length < 3 || title.length > 160) {
       throw new Error("Title must be between 3 and 160 characters.");
