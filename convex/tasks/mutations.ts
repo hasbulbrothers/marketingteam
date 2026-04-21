@@ -254,6 +254,31 @@ function validateTaskPayload(
   }
 }
 
+export const renameTask = mutation({
+  args: { taskId: v.id("tasks"), title: v.string() },
+  handler: async (ctx, args) => {
+    const currentUser = await requireTaskAccess(ctx, args.taskId);
+    const title = args.title.trim();
+    if (title.length < 3 || title.length > 160) {
+      throw new Error("Title must be between 3 and 160 characters.");
+    }
+    const task = await ensureTaskExists(ctx, args.taskId);
+    const oldTitle = task.title as string;
+    if (title === oldTitle) return;
+
+    await ctx.db.patch(args.taskId, { title, updatedAt: Date.now() });
+
+    await logActivity(ctx, {
+      userId: currentUser._id,
+      action: "task.updated",
+      entityType: "task",
+      entityId: String(args.taskId),
+      entityName: title,
+      changes: [{ field: "title", before: oldTitle, after: title }],
+    });
+  },
+});
+
 export const addSubtask = mutation({
   args: { taskId: v.id("tasks"), title: v.string() },
   handler: async (ctx, args) => {

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -15,12 +16,14 @@ export function TaskDetailSheet({
   onAddComment,
   onOpenChange,
   onStatusChange,
+  onRenameTask,
 }: {
   task: MarketingTask | null;
   comments: TaskComment[];
   onAddComment: (message: string) => void;
   onOpenChange: (open: boolean) => void;
   onStatusChange?: (taskId: string, status: TaskStatus) => void;
+  onRenameTask?: (taskId: string, title: string) => void;
 }) {
   return (
     <Sheet open={Boolean(task)} onOpenChange={onOpenChange}>
@@ -38,7 +41,7 @@ export function TaskDetailSheet({
                 {task.campaign ? <Badge variant="outline">{task.campaign.name}</Badge> : null}
               </div>
               <div className="space-y-3">
-                <SheetTitle className="text-3xl font-bold leading-tight tracking-tight text-slate-900">{task.title}</SheetTitle>
+                <EditableTitle title={task.title} onSave={onRenameTask ? (title) => onRenameTask(task.id, title) : undefined} />
                 <p className="text-sm leading-7 text-slate-500">{task.description}</p>
               </div>
             </SheetHeader>
@@ -82,6 +85,58 @@ const STATUS_COLORS: Record<TaskStatus, string> = {
   published: "bg-emerald-50 text-emerald-700",
   archived: "bg-slate-50 text-slate-500",
 };
+
+function EditableTitle({ title, onSave }: { title: string; onSave?: (title: string) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(title);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setValue(title); }, [title]);
+  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
+
+  function save() {
+    const trimmed = value.trim();
+    if (!trimmed || trimmed.length < 3) {
+      setValue(title);
+      setEditing(false);
+      return;
+    }
+    if (trimmed !== title) onSave?.(trimmed);
+    setEditing(false);
+  }
+
+  if (!onSave) {
+    return <SheetTitle className="text-3xl font-bold leading-tight tracking-tight text-slate-900">{title}</SheetTitle>;
+  }
+
+  if (!editing) {
+    return (
+      <button
+        type="button"
+        onClick={() => setEditing(true)}
+        className="group flex w-full items-start gap-2 text-left"
+      >
+        <SheetTitle className="text-3xl font-bold leading-tight tracking-tight text-slate-900 group-hover:text-primary">{title}</SheetTitle>
+        <Pencil className="mt-2 h-4 w-4 flex-shrink-0 text-slate-300 opacity-0 transition group-hover:opacity-100" />
+      </button>
+    );
+  }
+
+  return (
+    <input
+      ref={inputRef}
+      type="text"
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={save}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") save();
+        if (e.key === "Escape") { setValue(title); setEditing(false); }
+      }}
+      className="w-full border-b-2 border-primary bg-transparent text-3xl font-bold leading-tight tracking-tight text-slate-900 outline-none"
+    />
+  );
+}
 
 function StatusSelector({
   currentStatus,
