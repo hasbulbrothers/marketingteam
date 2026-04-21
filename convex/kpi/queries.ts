@@ -30,6 +30,7 @@ type TaskDoc = {
   publishedAt?: string;
   createdAt: number;
   isArchived: boolean;
+  subtasks?: { id: string; title: string; isCompleted: boolean }[];
 };
 
 const MS_PER_DAY = 86_400_000;
@@ -70,9 +71,13 @@ function computeActual(
 
   switch (kpi.metric) {
     case "tasks_completed": {
-      return withinRange.filter((t) =>
-        PUBLISHED_STATUSES.includes(t.status),
-      ).length;
+      return withinRange.filter((t) => {
+        const subs = t.subtasks ?? [];
+        if (subs.length > 0) {
+          return subs.every((s) => s.isCompleted);
+        }
+        return PUBLISHED_STATUSES.includes(t.status);
+      }).length;
     }
     case "posts_published": {
       return withinRange.filter((t) => t.status === "published").length;
