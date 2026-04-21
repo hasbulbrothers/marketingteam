@@ -71,16 +71,14 @@ function computeActual(
 
   switch (kpi.metric) {
     case "tasks_completed": {
-      let count = 0;
-      for (const t of withinRange) {
+      let completed = 0;
+      let total = 0;
+      for (const t of scoped) {
         const subs = t.subtasks ?? [];
-        if (subs.length > 0) {
-          count += subs.filter((s) => s.isCompleted).length;
-        } else if (PUBLISHED_STATUSES.includes(t.status)) {
-          count += 1;
-        }
+        total += subs.length;
+        completed += subs.filter((s) => s.isCompleted).length;
       }
-      return count;
+      return total > 0 ? Math.round((completed / total) * 100) : 0;
     }
     case "posts_published": {
       return withinRange.filter((t) => t.status === "published").length;
@@ -117,15 +115,20 @@ function serializeKpi(
   userName?: string,
   actual = 0,
 ) {
+  const isSubtaskPercent = kpi.metric === "tasks_completed";
   const lowerIsBetter = kpi.metric === "average_lead_time_days";
-  const progress = lowerIsBetter
-    ? kpi.target > 0 && actual > 0
-      ? Math.min(100, Math.round((kpi.target / actual) * 100))
-      : 0
-    : kpi.target > 0
-      ? Math.min(100, Math.round((actual / kpi.target) * 100))
-      : 0;
-  const achieved = lowerIsBetter ? actual <= kpi.target : actual >= kpi.target;
+  const progress = isSubtaskPercent
+    ? actual
+    : lowerIsBetter
+      ? kpi.target > 0 && actual > 0
+        ? Math.min(100, Math.round((kpi.target / actual) * 100))
+        : 0
+      : kpi.target > 0
+        ? Math.min(100, Math.round((actual / kpi.target) * 100))
+        : 0;
+  const achieved = isSubtaskPercent
+    ? actual >= 100
+    : lowerIsBetter ? actual <= kpi.target : actual >= kpi.target;
 
   return {
     id: String(kpi._id),
