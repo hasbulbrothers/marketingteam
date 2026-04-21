@@ -56,6 +56,9 @@ function LiveCalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
   ) as TaskComment[] | undefined;
   const addComment = useMutation(api.comments.mutations.addComment);
   const createTask = useMutation(api.tasks.mutations.createTask);
+  const addSubtaskMutation = useMutation(api.tasks.mutations.addSubtask);
+  const toggleSubtaskMutation = useMutation(api.tasks.mutations.toggleSubtask);
+  const deleteSubtaskMutation = useMutation(api.tasks.mutations.deleteSubtask);
   const sourceTasks = useMemo(() => (isAuthed ? liveTasks ?? tasks : []), [isAuthed, liveTasks, tasks]);
   const visibleTasks = useMemo(() => filterCalendarTasks(sourceTasks, month, filters.view, filters), [filters, month, sourceTasks]);
   const visibleDays = useMemo(() => buildVisibleDays(month, filters.view), [filters.view, month]);
@@ -108,6 +111,21 @@ function LiveCalendarPageClient({ tasks }: { tasks: MarketingTask[] }) {
           });
         }}
         onOpenChange={(open) => !open && setSelectedTaskId(null)}
+        onAddSubtask={(taskId, title) => {
+          void addSubtaskMutation({ taskId, title } as never).catch((err) => {
+            toast.error(err instanceof Error ? err.message : "Failed to add subtask");
+          });
+        }}
+        onToggleSubtask={(taskId, subtaskId) => {
+          void toggleSubtaskMutation({ taskId, subtaskId } as never).catch((err) => {
+            toast.error(err instanceof Error ? err.message : "Failed to update subtask");
+          });
+        }}
+        onDeleteSubtask={(taskId, subtaskId) => {
+          void deleteSubtaskMutation({ taskId, subtaskId } as never).catch((err) => {
+            toast.error(err instanceof Error ? err.message : "Failed to delete subtask");
+          });
+        }}
       />
       {createDate ? (
         <TaskCreateDialog
