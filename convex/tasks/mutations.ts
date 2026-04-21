@@ -257,7 +257,8 @@ function validateTaskPayload(
 export const addSubtask = mutation({
   args: { taskId: v.id("tasks"), title: v.string() },
   handler: async (ctx, args) => {
-    await requireTaskAccess(ctx, args.taskId);
+    const currentUser = await requireTaskAccess(ctx, args.taskId);
+    await enforceRateLimit(ctx, String(currentUser._id), "addSubtask", 30, 60_000);
     const task = await ensureTaskExists(ctx, args.taskId);
     const title = args.title.trim();
     if (!title || title.length > 200) throw new Error("Subtask title must be between 1 and 200 characters.");
@@ -277,7 +278,8 @@ export const addSubtask = mutation({
 export const toggleSubtask = mutation({
   args: { taskId: v.id("tasks"), subtaskId: v.string() },
   handler: async (ctx, args) => {
-    await requireTaskAccess(ctx, args.taskId);
+    const currentUser = await requireTaskAccess(ctx, args.taskId);
+    await enforceRateLimit(ctx, String(currentUser._id), "toggleSubtask", 60, 60_000);
     const task = await ensureTaskExists(ctx, args.taskId);
     const subtasks = (task.subtasks as { id: string; title: string; isCompleted: boolean }[] | undefined) ?? [];
     const idx = subtasks.findIndex((s) => s.id === args.subtaskId);
@@ -291,7 +293,8 @@ export const toggleSubtask = mutation({
 export const deleteSubtask = mutation({
   args: { taskId: v.id("tasks"), subtaskId: v.string() },
   handler: async (ctx, args) => {
-    await requireTaskAccess(ctx, args.taskId);
+    const currentUser = await requireTaskAccess(ctx, args.taskId);
+    await enforceRateLimit(ctx, String(currentUser._id), "deleteSubtask", 30, 60_000);
     const task = await ensureTaskExists(ctx, args.taskId);
     const subtasks = (task.subtasks as { id: string; title: string; isCompleted: boolean }[] | undefined) ?? [];
     await ctx.db.patch(args.taskId, {

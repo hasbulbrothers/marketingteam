@@ -296,7 +296,6 @@ export const getTeamKpiSummary = query({
           )
         : 0;
 
-    type SubtaskItem = { id: string; title: string; isCompleted: boolean };
     const memberSubtaskProgress = members
       .filter((m) => m.isActive)
       .map((member) => {
@@ -306,7 +305,7 @@ export const getTeamKpiSummary = query({
         let total = 0;
         let completed = 0;
         for (const task of userTasks) {
-          const subtasks = ((task as unknown as { subtasks?: SubtaskItem[] }).subtasks) ?? [];
+          const subtasks = task.subtasks ?? [];
           total += subtasks.length;
           completed += subtasks.filter((s) => s.isCompleted).length;
         }

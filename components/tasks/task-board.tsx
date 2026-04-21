@@ -71,11 +71,12 @@ export function TaskBoard({
   }
 
   async function handleAddComment(message: string) {
-    if (!selectedTask) return;
+    const taskId = selectedTaskId;
+    if (!taskId) return;
 
     const comment: TaskComment = {
       id: crypto.randomUUID(),
-      taskId: selectedTask.id,
+      taskId,
       author: "You",
       role: "Marketing Team",
       message,
@@ -84,9 +85,9 @@ export function TaskBoard({
 
     setLocalCommentsByTask((current) => ({
       ...current,
-      [selectedTask.id]: [...(current[selectedTask.id] ?? []), comment],
+      [taskId]: [...(current[taskId] ?? []), comment],
     }));
-    await onAddComment?.(selectedTask.id, message);
+    await onAddComment?.(taskId, message);
   }
 
   return (

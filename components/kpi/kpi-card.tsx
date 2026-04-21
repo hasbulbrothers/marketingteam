@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useMutation } from "convex/react";
+import { toast } from "sonner";
 import { CheckCircle2, Trash2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -24,7 +25,7 @@ export function KpiCard({
     if (!confirm("Delete this KPI target?")) return;
     setBusy(true);
     try { await deleteKpi({ kpiId: kpi.id as Id<"kpiTargets"> }); }
-    catch (err) { alert(err instanceof Error ? err.message : "Failed to delete KPI"); }
+    catch (err) { toast.error(err instanceof Error ? err.message : "Failed to delete KPI"); }
     finally { setBusy(false); }
   };
 
