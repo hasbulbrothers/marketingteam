@@ -28,6 +28,9 @@ export const createCampaign = mutation({
     if (!isIsoDate(args.startDate) || !isIsoDate(args.endDate)) {
       throw new Error("Campaign dates must be valid ISO date strings.");
     }
+    if (args.endDate < args.startDate) {
+      throw new Error("End date must be on or after start date.");
+    }
     if (args.budget < 0) throw new Error("Budget must be zero or greater.");
 
     const owner = await ctx.db.get(args.ownerId);

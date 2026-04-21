@@ -102,6 +102,9 @@ function StatusSelector({
       <button
         type="button"
         onClick={() => setOpen(!open)}
+        aria-label={`Change status from ${label}`}
+        aria-expanded={open}
+        aria-haspopup="listbox"
         className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-colors hover:ring-2 hover:ring-primary/20 ${STATUS_COLORS[currentStatus]}`}
       >
         {label}
@@ -110,11 +113,13 @@ function StatusSelector({
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 top-full z-50 mt-1 w-48 rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+          <div role="listbox" aria-label="Task status options" className="absolute left-0 top-full z-50 mt-1 w-48 rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
             {TASK_STATUSES.map((s) => (
               <button
                 key={s.value}
                 type="button"
+                role="option"
+                aria-selected={s.value === currentStatus}
                 onClick={() => {
                   onStatusChange(s.value);
                   setOpen(false);

@@ -299,22 +299,22 @@ export const getCampaignDetail = query({
       channelMap.set(metric.channel, entry);
     }
 
-    const taskRows = await Promise.all(
-      tasks
-        .filter((task) => !task.isArchived && task.status !== "archived")
-        .map(async (task) => {
-          const assignee = task.assigneeId ? await ctx.db.get(task.assigneeId) : null;
-          return {
-            id: String(task._id),
-            title: task.title,
-            status: task.status,
-            dueDate: task.dueDate ?? null,
-            assignee: assignee?.name ?? "Unassigned",
-            platform: task.platform,
-            priority: task.priority,
-          };
-        }),
-    );
+    const userMap = new Map(allUsers.map((u) => [String(u._id), u]));
+
+    const taskRows = tasks
+      .filter((task) => !task.isArchived && task.status !== "archived")
+      .map((task) => {
+        const assignee = task.assigneeId ? userMap.get(String(task.assigneeId)) : null;
+        return {
+          id: String(task._id),
+          title: task.title,
+          status: task.status,
+          dueDate: task.dueDate ?? null,
+          assignee: assignee?.name ?? "Unassigned",
+          platform: task.platform,
+          priority: task.priority,
+        };
+      });
 
     const contributionMap = new Map<string, { person: string; role: string; tasks: number; completed: number }>();
     for (const task of tasks) {
