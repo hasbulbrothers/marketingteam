@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { addMonths, addWeeks, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from "date-fns";
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
 import { TaskDetailSheet } from "@/components/tasks/task-detail-sheet";
 import { TaskTableNotion } from "@/components/tasks/task-table-notion";
-import { TaskToolbar } from "@/components/tasks/task-toolbar";
+import { TaskToolbar, PeriodView } from "@/components/tasks/task-toolbar";
 import { useTaskBoard } from "@/hooks/use-task-board";
 import { useTaskFilters } from "@/hooks/use-task-filters";
 import { CampaignSummary } from "@/types/campaign";
@@ -43,12 +44,41 @@ export function TaskBoard({
   onDeleteSubtask,
   onRenameTask,
 }: TaskBoardProps) {
-  const tasks = initialTasks;
+  const [periodView, setPeriodView] = useState<PeriodView>("month");
+  const [periodDate, setPeriodDate] = useState(new Date());
   const [localSelectedTaskId, setLocalSelectedTaskId] = useState<string | null>(null);
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [localCommentsByTask, setLocalCommentsByTask] = useState<Record<string, TaskComment[]>>({});
   const { filters } = useTaskFilters();
+
+  const periodStart = periodView === "week" ? startOfWeek(periodDate) : startOfMonth(periodDate);
+  const periodEnd = periodView === "week" ? endOfWeek(periodDate) : endOfMonth(periodDate);
+  const periodLabel = periodView === "week"
+    ? `${format(periodStart, "dd MMM")} — ${format(periodEnd, "dd MMM yyyy")}`
+    : format(periodDate, "MMMM yyyy");
+
+  const tasks = useMemo(() => {
+    return initialTasks.filter((task) => {
+      if (!task.dueDate) return true;
+      const due = new Date(task.dueDate);
+      return due >= periodStart && due <= periodEnd;
+    });
+  }, [initialTasks, periodStart, periodEnd]);
+
   const { summary } = useTaskBoard(tasks, filters);
+
+  function handlePeriodChange(direction: "prev" | "next") {
+    const delta = direction === "next" ? 1 : -1;
+    setPeriodDate((current) =>
+      periodView === "week" ? addWeeks(current, delta) : addMonths(current, delta)
+    );
+  }
+
+  function handlePeriodViewChange(view: PeriodView) {
+    const today = new Date();
+    setPeriodDate(view === "week" ? today : new Date(today.getFullYear(), today.getMonth(), 1));
+    setPeriodView(view);
+  }
   const selectedTaskId = controlledSelectedTaskId ?? localSelectedTaskId;
   const commentsByTask = externalComments ?? localCommentsByTask;
 
@@ -100,6 +130,10 @@ export function TaskBoard({
         summary={summary}
         onCreate={() => setCreateOpen(true)}
         activeFilterCount={0}
+        periodLabel={periodLabel}
+        periodView={periodView}
+        onPeriodChange={handlePeriodChange}
+        onPeriodViewChange={handlePeriodViewChange}
       />
       <TaskTableNotion
         tasks={tasks}
