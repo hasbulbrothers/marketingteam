@@ -253,3 +253,50 @@ function validateTaskPayload(
     throw new Error("Scheduled date must be a valid ISO date string.");
   }
 }
+
+export const addSubtask = mutation({
+  args: { taskId: v.id("tasks"), title: v.string() },
+  handler: async (ctx, args) => {
+    await requireTaskAccess(ctx, args.taskId);
+    const task = await ensureTaskExists(ctx, args.taskId);
+    const title = args.title.trim();
+    if (!title || title.length > 200) throw new Error("Subtask title must be between 1 and 200 characters.");
+
+    const subtasks = (task.subtasks as { id: string; title: string; isCompleted: boolean }[] | undefined) ?? [];
+    if (subtasks.length >= 20) throw new Error("Maximum 20 subtasks per task.");
+
+    const id = `${String(args.taskId)}-${Date.now()}`;
+    await ctx.db.patch(args.taskId, {
+      subtasks: [...subtasks, { id, title, isCompleted: false }],
+      updatedAt: Date.now(),
+    });
+    return id;
+  },
+});
+
+export const toggleSubtask = mutation({
+  args: { taskId: v.id("tasks"), subtaskId: v.string() },
+  handler: async (ctx, args) => {
+    await requireTaskAccess(ctx, args.taskId);
+    const task = await ensureTaskExists(ctx, args.taskId);
+    const subtasks = (task.subtasks as { id: string; title: string; isCompleted: boolean }[] | undefined) ?? [];
+    const idx = subtasks.findIndex((s) => s.id === args.subtaskId);
+    if (idx === -1) throw new Error("Subtask not found.");
+
+    subtasks[idx] = { ...subtasks[idx], isCompleted: !subtasks[idx].isCompleted };
+    await ctx.db.patch(args.taskId, { subtasks, updatedAt: Date.now() });
+  },
+});
+
+export const deleteSubtask = mutation({
+  args: { taskId: v.id("tasks"), subtaskId: v.string() },
+  handler: async (ctx, args) => {
+    await requireTaskAccess(ctx, args.taskId);
+    const task = await ensureTaskExists(ctx, args.taskId);
+    const subtasks = (task.subtasks as { id: string; title: string; isCompleted: boolean }[] | undefined) ?? [];
+    await ctx.db.patch(args.taskId, {
+      subtasks: subtasks.filter((s) => s.id !== args.subtaskId),
+      updatedAt: Date.now(),
+    });
+  },
+});

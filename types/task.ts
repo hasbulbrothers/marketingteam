@@ -34,6 +34,7 @@ export type MarketingTask = {
   platform: Platform;
   contentType: ContentType;
   tags: string[];
+  subtasks?: { id: string; title: string; isCompleted: boolean }[];
   assignee: {
     id: string;
     name: string;

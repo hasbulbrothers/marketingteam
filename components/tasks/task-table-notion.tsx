@@ -44,16 +44,19 @@ function initials(name: string) {
   return name.split(" ").map((part) => part[0]).slice(0, 2).join("").toUpperCase();
 }
 
-export function TaskTableNotion({ tasks, onSelectTask }: { tasks: TaskWithSubtasks[]; onSelectTask?: (taskId: string) => void }) {
+export function TaskTableNotion({
+  tasks,
+  onSelectTask,
+  onAddSubtask,
+  onToggleSubtask,
+}: {
+  tasks: TaskWithSubtasks[];
+  onSelectTask?: (taskId: string) => void;
+  onAddSubtask?: (taskId: string, title: string) => void;
+  onToggleSubtask?: (taskId: string, subtaskId: string) => void;
+}) {
   const [query, setQuery] = useState("");
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
-  const [localSubtasks, setLocalSubtasks] = useState<Record<string, Subtask[]>>(() => {
-    const initial: Record<string, Subtask[]> = {};
-    for (const task of tasks) {
-      if (task.subtasks && task.subtasks.length > 0) initial[task.id] = task.subtasks;
-    }
-    return initial;
-  });
 
   const filtered = useMemo(() => {
     if (!query.trim()) return tasks;
@@ -69,24 +72,6 @@ export function TaskTableNotion({ tasks, onSelectTask }: { tasks: TaskWithSubtas
 
   function toggleExpanded(taskId: string) {
     setExpandedTaskId((current) => (current === taskId ? null : taskId));
-  }
-
-  function toggleSubtask(taskId: string, subtaskId: string) {
-    setLocalSubtasks((current) => ({
-      ...current,
-      [taskId]: (current[taskId] ?? []).map((item) =>
-        item.id === subtaskId ? { ...item, isCompleted: !item.isCompleted } : item,
-      ),
-    }));
-  }
-
-  function addSubtask(taskId: string, title: string) {
-    const trimmed = title.trim();
-    if (!trimmed) return;
-    setLocalSubtasks((current) => ({
-      ...current,
-      [taskId]: [...(current[taskId] ?? []), { id: `${taskId}-${Date.now()}`, title: trimmed, isCompleted: false }],
-    }));
   }
 
   return (
@@ -112,11 +97,11 @@ export function TaskTableNotion({ tasks, onSelectTask }: { tasks: TaskWithSubtas
               <MobileTaskCard
                 key={task.id}
                 task={task}
-                subtasks={localSubtasks[task.id] ?? []}
+                subtasks={task.subtasks ?? []}
                 isExpanded={expandedTaskId === task.id}
                 onToggleExpanded={() => toggleExpanded(task.id)}
-                onToggleSubtask={(subtaskId) => toggleSubtask(task.id, subtaskId)}
-                onAddSubtask={(title) => addSubtask(task.id, title)}
+                onToggleSubtask={(subtaskId) => onToggleSubtask?.(task.id, subtaskId)}
+                onAddSubtask={(title) => onAddSubtask?.(task.id, title)}
                 onEdit={onSelectTask ? () => onSelectTask(task.id) : undefined}
               />
             ))}
@@ -137,11 +122,11 @@ export function TaskTableNotion({ tasks, onSelectTask }: { tasks: TaskWithSubtas
               <DesktopTaskRow
                 key={task.id}
                 task={task}
-                subtasks={localSubtasks[task.id] ?? []}
+                subtasks={task.subtasks ?? []}
                 isExpanded={expandedTaskId === task.id}
                 onToggleExpanded={() => toggleExpanded(task.id)}
-                onToggleSubtask={(subtaskId) => toggleSubtask(task.id, subtaskId)}
-                onAddSubtask={(title) => addSubtask(task.id, title)}
+                onToggleSubtask={(subtaskId) => onToggleSubtask?.(task.id, subtaskId)}
+                onAddSubtask={(title) => onAddSubtask?.(task.id, title)}
                 onEdit={onSelectTask ? () => onSelectTask(task.id) : undefined}
               />
             ))}
@@ -327,7 +312,7 @@ function AddSubtaskInput({ onAdd }: { onAdd: (title: string) => void }) {
       <input
         type="text" value={value} onChange={(event) => setValue(event.target.value)}
         onKeyDown={(event) => { if (event.key === "Enter") submit(); }}
-        placeholder="Tambah sub-task"
+        placeholder="Add subtask"
         className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
       />
     </div>

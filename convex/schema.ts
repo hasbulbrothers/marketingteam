@@ -112,6 +112,11 @@ export default defineSchema({
     status: taskStatusValidator,
     priority: priorityValidator,
     tags: v.array(v.string()),
+    subtasks: v.optional(v.array(v.object({
+      id: v.string(),
+      title: v.string(),
+      isCompleted: v.boolean(),
+    }))),
     assigneeId: v.optional(v.id("users")),
     campaignId: v.optional(v.id("campaigns")),
     dueDate: v.optional(v.string()),

@@ -26,6 +26,7 @@ type RawTask = {
   title: string;
   description: string;
   tags: string[];
+  subtasks?: { id: string; title: string; isCompleted: boolean }[];
   status: string;
   platform: string;
   priority: string;
@@ -170,6 +171,7 @@ async function serializeTasks(ctx: QueryCtx, tasks: RawTask[]) {
       platform: task.platform,
       contentType: task.contentType,
       tags: task.tags,
+      subtasks: task.subtasks ?? [],
       assignee: {
         id: assignee ? String(assignee._id) : "unassigned",
         name: assignee?.name ?? "Unassigned",

@@ -22,6 +22,8 @@ type TaskBoardProps = {
   onCreateTask?: (task: MarketingTask) => Promise<void> | void;
   onAddComment?: (taskId: string, message: string) => Promise<void> | void;
   onStatusChange?: (taskId: string, status: TaskStatus) => Promise<void> | void;
+  onAddSubtask?: (taskId: string, title: string) => void;
+  onToggleSubtask?: (taskId: string, subtaskId: string) => void;
 };
 
 export function TaskBoard({
@@ -34,6 +36,8 @@ export function TaskBoard({
   onCreateTask,
   onAddComment,
   onStatusChange,
+  onAddSubtask,
+  onToggleSubtask,
 }: TaskBoardProps) {
   const [tasks, setTasks] = useState(initialTasks);
   const initialTasksRef = useRef(initialTasks);
@@ -101,7 +105,12 @@ export function TaskBoard({
         onCreate={() => setCreateOpen(true)}
         activeFilterCount={0}
       />
-      <TaskTableNotion tasks={tasks} onSelectTask={(taskId) => openTask(taskId)} />
+      <TaskTableNotion
+        tasks={tasks}
+        onSelectTask={(taskId) => openTask(taskId)}
+        onAddSubtask={onAddSubtask}
+        onToggleSubtask={onToggleSubtask}
+      />
       <TaskDetailSheet
         task={selectedTask}
         comments={selectedTask ? commentsByTask[selectedTask.id] ?? [] : []}
