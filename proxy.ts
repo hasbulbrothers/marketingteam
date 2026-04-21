@@ -7,6 +7,9 @@ const isProtectedRoute = createRouteMatcher([
   "/team(.*)",
   "/assets(.*)",
   "/reports(.*)",
+  "/analytics(.*)",
+  "/activity(.*)",
+  "/settings(.*)",
 ]);
 const hasClerk = Boolean(
   process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY,

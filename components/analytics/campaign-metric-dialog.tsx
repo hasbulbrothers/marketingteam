@@ -67,12 +67,12 @@ export function CampaignMetricDialog({
         campaignId: form.campaignId,
         date: form.date,
         channel: form.channel,
-        spend: Number(form.spend || 0),
-        reach: Number(form.reach || 0),
-        clicks: Number(form.clicks || 0),
-        leads: Number(form.leads || 0),
-        participants: Number(form.participants || 0),
-        conversions: Number(form.conversions || 0),
+        spend: Math.max(0, Number(form.spend) || 0),
+        reach: Math.max(0, Number(form.reach) || 0),
+        clicks: Math.max(0, Number(form.clicks) || 0),
+        leads: Math.max(0, Number(form.leads) || 0),
+        participants: Math.max(0, Number(form.participants) || 0),
+        conversions: Math.max(0, Number(form.conversions) || 0),
       });
       setForm(initialState);
       onOpenChange(false);

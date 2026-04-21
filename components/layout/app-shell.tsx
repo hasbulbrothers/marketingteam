@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
+import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
@@ -63,19 +64,24 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
         assignees={assignees}
         campaigns={campaigns ?? []}
         onCreate={async (task) => {
-          await createTask({
-            title: task.title,
-            description: task.description,
-            status: task.status,
-            priority: task.priority,
-            platform: task.platform,
-            contentType: task.contentType,
-            tags: task.tags,
-            dueDate: task.dueDate,
-            scheduledAt: task.status === "scheduled" ? task.dueDate : undefined,
-            assigneeId: task.assignee.id === "unassigned" ? undefined : task.assignee.id,
-            campaignId: task.campaign?.id ?? undefined,
-          } as never);
+          try {
+            await createTask({
+              title: task.title,
+              description: task.description,
+              status: task.status,
+              priority: task.priority,
+              platform: task.platform,
+              contentType: task.contentType,
+              tags: task.tags,
+              dueDate: task.dueDate,
+              scheduledAt: task.status === "scheduled" ? task.dueDate : undefined,
+              assigneeId: task.assignee.id === "unassigned" ? undefined : task.assignee.id,
+              campaignId: task.campaign?.id ?? undefined,
+            } as never);
+            toast.success("Task created");
+          } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Failed to create task");
+          }
         }}
       />
     </div>

@@ -72,7 +72,7 @@ export function CampaignCreateDialog({
         description: form.description.trim() || undefined,
         ownerId: form.ownerId,
         teamId: form.teamId || undefined,
-        budget: Number(form.budget || 0),
+        budget: Math.max(0, Number(form.budget) || 0),
         startDate: form.startDate,
         endDate: form.endDate,
         status: form.status,

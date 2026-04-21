@@ -193,8 +193,8 @@ function LiveCampaignDetailView({ campaignId }: { campaignId: string }) {
             <Badge variant="outline">Task contribution</Badge>
           </div>
           <div className="space-y-3">
-            {detail.contributionRows.length ? detail.contributionRows.map((row: { person: string; role: string; tasks: number; completed: number; onTime: string }) => (
-              <div key={row.person} className="rounded-[24px] bg-slate-50 p-4">
+            {detail.contributionRows.length ? detail.contributionRows.map((row: { person: string; role: string; tasks: number; completed: number; onTime: string }, index: number) => (
+              <div key={`${row.person}-${index}`} className="rounded-[24px] bg-slate-50 p-4">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold text-slate-900">{row.person}</p>

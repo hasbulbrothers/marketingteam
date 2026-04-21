@@ -18,8 +18,7 @@ function useAuthFromClerk() {
         return null;
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [orgId, orgRole],
+    [getToken, orgId, orgRole],
   );
   return useMemo(
     () => ({
