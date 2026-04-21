@@ -295,7 +295,7 @@ function SubtaskList({ subtasks, onToggle, onAdd }: { subtasks: Subtask[]; onTog
   return (
     <>
       {subtasks.length === 0 ? (
-        <p className="py-2 text-xs text-slate-400">Tiada sub-task lagi.</p>
+        <p className="py-2 text-xs text-slate-400">No subtasks yet.</p>
       ) : (
         <ul className="space-y-0.5 py-1">
           {subtasks.map((subtask) => (

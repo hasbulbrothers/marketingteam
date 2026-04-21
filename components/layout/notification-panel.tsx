@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
+import { toast } from "sonner";
 import { Bell, CheckCheck, MessageSquare, ShieldCheck, UserPlus } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -92,7 +93,10 @@ function NotificationDropdown({ onClose }: { onClose: () => void }) {
         {hasUnread && (
           <button
             className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80"
-            onClick={() => markAllAsRead({})}
+            onClick={async () => {
+              try { await markAllAsRead({}); }
+              catch (err) { toast.error(err instanceof Error ? err.message : "Failed to mark as read"); }
+            }}
           >
             <CheckCheck className="h-3.5 w-3.5" />
             Mark all read
@@ -116,7 +120,11 @@ function NotificationDropdown({ onClose }: { onClose: () => void }) {
                   !n.isRead ? "bg-primary/[0.03]" : ""
                 }`}
                 onClick={async () => {
-                  if (!n.isRead) await markAsRead({ notificationId: n._id as Id<"notifications"> });
+                  try {
+                    if (!n.isRead) await markAsRead({ notificationId: n._id as Id<"notifications"> });
+                  } catch (err) {
+                    toast.error(err instanceof Error ? err.message : "Failed to mark as read");
+                  }
                   onClose();
                 }}
               >

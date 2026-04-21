@@ -30,6 +30,7 @@ export function UserSyncProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    let cancelled = false;
     syncedUserIdRef.current = userId;
 
     void upsertUser({
@@ -39,10 +40,13 @@ export function UserSyncProvider({ children }: { children: React.ReactNode }) {
       jobTitle: "Team Member",
       avatarUrl,
     }).catch((err) => {
+      if (cancelled) return;
       console.error("User sync failed:", err);
       syncedUserIdRef.current = null;
       retryCountRef.current += 1;
     });
+
+    return () => { cancelled = true; };
   }, [avatarUrl, email, isLoaded, isSignedIn, name, upsertUser, userId]);
 
   return children;

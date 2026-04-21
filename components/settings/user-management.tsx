@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
+import { toast } from "sonner";
 import { Shield, ShieldCheck, UserX } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -75,8 +76,14 @@ export function UserManagement() {
             key={String(user._id)}
             user={user}
             isSelf={currentUser?.id === String(user._id)}
-            onChangeRole={async (role) => { await updateRole({ userId: user._id, role }); }}
-            onDeactivate={async () => { await deactivateUser({ userId: user._id }); }}
+            onChangeRole={async (role) => {
+              try { await updateRole({ userId: user._id, role }); toast.success("Role updated"); }
+              catch (err) { toast.error(err instanceof Error ? err.message : "Failed to update role"); }
+            }}
+            onDeactivate={async () => {
+              try { await deactivateUser({ userId: user._id }); toast.success("User deactivated"); }
+              catch (err) { toast.error(err instanceof Error ? err.message : "Failed to deactivate user"); }
+            }}
           />
         ))}
       </div>
@@ -95,8 +102,14 @@ export function UserManagement() {
             key={String(user._id)}
             user={user}
             isSelf={currentUser?.id === String(user._id)}
-            onChangeRole={async (role) => { await updateRole({ userId: user._id, role }); }}
-            onDeactivate={async () => { await deactivateUser({ userId: user._id }); }}
+            onChangeRole={async (role) => {
+              try { await updateRole({ userId: user._id, role }); toast.success("Role updated"); }
+              catch (err) { toast.error(err instanceof Error ? err.message : "Failed to update role"); }
+            }}
+            onDeactivate={async () => {
+              try { await deactivateUser({ userId: user._id }); toast.success("User deactivated"); }
+              catch (err) { toast.error(err instanceof Error ? err.message : "Failed to deactivate user"); }
+            }}
           />
         ))}
       </div>

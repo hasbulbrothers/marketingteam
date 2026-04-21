@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useMutation } from "convex/react";
+import { toast } from "sonner";
 import { Pencil, Plus, Trash2, Users } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -35,7 +36,7 @@ export function CreateTeamDialog({ users }: { users: UserSummary[] }) {
       setName(""); setDescription(""); setColor(COLOR_PRESETS[0]); setLeaderId("");
       setOpen(false);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to create team");
+      toast.error(err instanceof Error ? err.message : "Failed to create team");
     } finally {
       setSubmitting(false);
     }
@@ -79,7 +80,7 @@ export function EditTeamDialog({ team, users }: { team: TeamSummary; users: User
       });
       setOpen(false);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to update team");
+      toast.error(err instanceof Error ? err.message : "Failed to update team");
     } finally {
       setSubmitting(false);
     }
@@ -112,7 +113,7 @@ export function DeleteTeamButton({ teamId, teamName }: { teamId: string; teamNam
     try {
       await deleteTeam({ teamId: teamId as Id<"teams"> });
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to delete team");
+      toast.error(err instanceof Error ? err.message : "Failed to delete team");
     } finally {
       setBusy(false);
     }
@@ -135,14 +136,14 @@ export function ManageMembersDialog({ teamId, teamName, members, availableUsers 
   const handleAdd = async (userId: Id<"users">) => {
     setPendingId(String(userId));
     try { await assignUser({ userId, teamId: teamId as Id<"teams"> }); }
-    catch (err) { alert(err instanceof Error ? err.message : "Failed to assign user"); }
+    catch (err) { toast.error(err instanceof Error ? err.message : "Failed to assign user"); }
     finally { setPendingId(null); }
   };
 
   const handleRemove = async (userId: Id<"users">) => {
     setPendingId(String(userId));
     try { await assignUser({ userId, teamId: null }); }
-    catch (err) { alert(err instanceof Error ? err.message : "Failed to remove user"); }
+    catch (err) { toast.error(err instanceof Error ? err.message : "Failed to remove user"); }
     finally { setPendingId(null); }
   };
 
