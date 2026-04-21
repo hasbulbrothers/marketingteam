@@ -72,8 +72,14 @@ function computeActual(
     case "tasks_completed": {
       let completed = 0;
       for (const t of scoped) {
+        const hasDueInRange = t.dueDate &&
+          parseDateStart(t.dueDate) >= rangeStart &&
+          parseDateStart(t.dueDate) <= rangeEnd;
         const subs = t.subtasks ?? [];
-        completed += subs.filter((s) => s.isCompleted).length;
+        const done = subs.filter((s) => s.isCompleted).length;
+        if (hasDueInRange || done > 0) {
+          completed += done;
+        }
       }
       return completed;
     }
