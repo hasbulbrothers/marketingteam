@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { TaskCreateDialog } from "@/components/tasks/task-create-dialog";
 import { TaskDetailSheet } from "@/components/tasks/task-detail-sheet";
 import { TaskTableNotion } from "@/components/tasks/task-table-notion";
@@ -39,15 +39,7 @@ export function TaskBoard({
   onAddSubtask,
   onToggleSubtask,
 }: TaskBoardProps) {
-  const [tasks, setTasks] = useState(initialTasks);
-  const initialTasksRef = useRef(initialTasks);
-  useEffect(() => {
-    const prev = initialTasksRef.current;
-    if (prev.length !== initialTasks.length || JSON.stringify(prev.map((t) => t.id + t.status)) !== JSON.stringify(initialTasks.map((t) => t.id + t.status))) {
-      setTasks(initialTasks);
-      initialTasksRef.current = initialTasks;
-    }
-  }, [initialTasks]);
+  const tasks = initialTasks;
   const [localSelectedTaskId, setLocalSelectedTaskId] = useState<string | null>(null);
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [localCommentsByTask, setLocalCommentsByTask] = useState<Record<string, TaskComment[]>>({});
@@ -74,7 +66,6 @@ export function TaskBoard({
   }
 
   async function handleCreate(task: MarketingTask) {
-    setTasks((current) => [task, ...current]);
     openTask(task.id);
     await onCreateTask?.(task);
   }
