@@ -40,7 +40,11 @@ export const upsertUserFromClerk = mutation({
 
     if (existing) {
       await ctx.db.patch(existing._id, {
-        ...payload,
+        clerkId: identity.subject,
+        email,
+        avatarUrl: args.avatarUrl,
+        isActive: true,
+        updatedAt: Date.now(),
         role: resolveRole(email, existing.role),
       });
       return existing._id;
