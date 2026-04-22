@@ -60,7 +60,7 @@ export function TaskCreateDialog({
     onCreate({
       id: `task-${crypto.randomUUID()}`,
       title: form.title.trim(),
-      description: form.description.trim() || "-",
+      description: form.description.trim(),
       dueDate: form.dueDate || null,
       platform: form.platform,
       contentType: form.contentType,

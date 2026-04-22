@@ -83,8 +83,8 @@ export function TaskBoard({
   const commentsByTask = externalComments ?? localCommentsByTask;
 
   const selectedTask = useMemo(
-    () => tasks.find((task) => task.id === selectedTaskId) ?? null,
-    [selectedTaskId, tasks],
+    () => initialTasks.find((task) => task.id === selectedTaskId) ?? null,
+    [selectedTaskId, initialTasks],
   );
 
   const assignees = useMemo<TeamMember[]>(() => {

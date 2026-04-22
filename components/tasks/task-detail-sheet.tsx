@@ -48,7 +48,7 @@ export function TaskDetailSheet({
               </div>
               <div className="space-y-3">
                 <EditableTitle title={task.title} onSave={onRenameTask ? (title) => onRenameTask(task.id, title) : undefined} />
-                <p className="text-sm leading-7 text-slate-500">{task.description}</p>
+                {task.description && <p className="text-sm leading-7 text-slate-500">{task.description}</p>}
               </div>
             </SheetHeader>
             <div className="grid gap-3 sm:grid-cols-2">
